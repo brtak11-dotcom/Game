@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Náš rok">
+<meta name="theme-color" content="#1d1510">
+<title>Náš rok, kapitola 1</title>
+<style>
+html,body{margin:0;height:100%;background:#1d1510;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;overscroll-behavior:none}
+#stage{position:fixed;inset:0;box-sizing:border-box;height:100%;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#wrap{position:relative;width:100%;height:100%;cursor:pointer}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block;shape-rendering:crispEdges}
+#scene text{font-family:ui-monospace,Menlo,monospace}
+#coin{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+#title{position:absolute;inset:0;background:rgba(10,6,4,.86);color:#f7ead2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;text-align:center;z-index:5;font-family:system-ui,-apple-system,sans-serif}
+#title[hidden]{display:none}
+#title h1{font-size:22px;font-weight:500;margin:0 0 12px}
+#title p{font-size:17px;line-height:1.5;max-width:520px;margin:0 0 18px}
+#titleHint{font-size:12px;opacity:.6}
+#quest{position:absolute;left:10px;top:8px;background:rgba(20,12,8,.6);color:#f7ead2;font:600 13px system-ui,-apple-system,sans-serif;padding:7px 10px;border-radius:8px;pointer-events:none}
+#inv{position:absolute;right:10px;top:8px;display:flex;gap:6px}
+.slot{min-width:44px;min-height:44px;background:rgba(20,12,8,.6);border:none;border-radius:10px;color:#f7ead2;display:flex;align-items:center;justify-content:center;padding:0;-webkit-tap-highlight-color:transparent}
+#dlg{position:absolute;left:10px;right:10px;bottom:10px;background:rgba(20,12,8,.82);color:#f7ead2;border-radius:14px;padding:14px 16px;min-height:64px;box-sizing:border-box;font:400 17px/1.4 system-ui,-apple-system,sans-serif}
+#dlg[hidden]{display:none}
+.choice{display:block;width:100%;min-height:44px;margin:6px 0;background:#3b3560;color:#f7ead2;border:none;border-radius:10px;font:500 16px system-ui,-apple-system,sans-serif;text-align:left;padding:10px 12px;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+#dlgHint{font-size:12px;opacity:.6;margin-top:6px;text-align:right}
+#rotate{display:none;position:fixed;inset:0;background:#1d1510;color:#f7ead2;align-items:center;justify-content:center;font:600 20px system-ui,-apple-system,sans-serif;text-align:center;padding:24px;z-index:10}
+#dlg{z-index:6}
+#strobe{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:3}
+#strobe.on{animation:strobe .5s steps(2,end) infinite}
+@keyframes strobe{0%{opacity:.6}50%{opacity:0}100%{opacity:.6}}
+#closeup{position:absolute;inset:0;background:rgba(10,6,4,.92);display:flex;align-items:center;justify-content:center;z-index:4}
+#closeup[hidden]{display:none}
+@keyframes pulseHeart{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}45%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}65%{transform:translate(-50%,-50%) scale(.95)}85%{transform:translate(-50%,-50%) scale(1.05)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes fallHeart{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(60px) rotate(25deg)}}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,0) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-70px) scale(1.1)}}
+@media (orientation: portrait){#rotate{display:flex}#stage{visibility:hidden}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="wrap">
+    <svg id="scene" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hospoda s barmanem, automatem a mincí na zemi">
+      <g id="bg"></g>
+      <g id="objs"></g>
+      <g id="sabG"></g>
+      <g id="ondG" style="display:none"></g>
+    </svg>
+    <select id="dev" style="position:absolute;top:4px;left:50%;transform:translateX(-50%);z-index:9;font:12px system-ui,sans-serif;background:rgba(20,12,8,.8);color:#f7ead2;border:none;border-radius:8px;padding:4px 6px;max-width:60%"><option value="kap1">1. Marry</option><option value="kap2">2. Výběr hráčů</option><option value="map">Mapa</option><option value="chata">Chatička</option><option value="interier">Interiér</option><option value="kopriv">Kopřivna</option><option value="bazen">Bazén</option><option value="map2">Mapa 2 (po bazénu)</option><option value="marry2">Marry 2</option><option value="tromso">Tromsø (rovnou)</option></select><div id="strobe"></div><div id="closeup" hidden></div><div id="title"><h1>Kapitola 1</h1><p id="titleText"></p><div id="titleHint">Klepni pro pokračování</div></div>
+    <div id="quest"></div>
+    <div id="inv"></div>
+    <div id="dlg" hidden>
+      <div id="dlgText"></div>
+      <div id="dlgChoices"></div>
+      <div id="dlgHint">Klepni pro pokračování</div>
+    </div>
+  </div>
+</div>
+<div id="rotate">Otoč telefon na šířku</div>
+
+<script>
+/* ===================== PIXELOVÉ PŘEDLOHY ===================== */
+/* Každý znak = jeden pixel (2 jednotky scény). '.' = průhledné. */
+
+const SAB_HEAD_FRONT = [
+  "HHHHHHHHHHHH","HHHHHHHHHHHH","HHSSSSSSSSHH","HSSSSSSSSSSH",
+  "HSKKSSSSKKSH","HSWBBWWBBWSH","HSSBBSSBBSSH","HSRSSNNSSRSH",
+  "HSSSSSSSSSSH","HSSSPPPPSSSH","HSSSSSSSSSSH",".HSSSSSSSSH."
+];
+const SAB_HEAD_PROFILE = [
+  ".HHHHHHHHH",".HHHHHHHHH","HHHHSSSSSS","HHHSSSSSSS",
+  "HHSSKSSSSS","HHSSSBSSSS","HHSSSSSSSS","HHSSSSSSNS",
+  "HHSSSSSSSS","HHSSSSPPSS","HHSSSSSSSS",".HSSSSSSS."
+];
+const SAB_BODY_FRONT = [
+  "....SSSS....","HHSCCCCCCSHH","HHSCCCCCCSHH","HSCCCCCCCCSH",
+  "HSSCCCCCCSSH",".JJJJJJJJJJ.",".JJJJJJJJJJ.",".JJJJ..JJJJ.",
+  ".JJJJ..JJJJ.",".JJJJ..JJJJ.",".JJJJ..JJJJ.","..JJJ..JJJ..","..DDD..DDD.."
+].map(r => r.length === 12 ? r : r.slice(0, 12));
+const SAB_BODY_PROFILE = [
+  "....SSSS....",".HHCCCCCCCC..",".HHCCCCCCCC..",".HHCCCCCCCCS.",
+  ".HHCCCCCCCCS.","..JJJJJJJJJ.","..JJJJJJJJJ.","..JJJJ.JJJJ.",
+  "..JJJJ.JJJJ.","..JJJJ.JJJJ.","...JJJ.JJJ..","..DDDD.DDD..","..DDDD.DDD.."
+];
+const SAB_FRONT_ROWS = SAB_HEAD_FRONT.concat(SAB_BODY_FRONT);
+const SAB_RIGHT_ROWS = SAB_HEAD_PROFILE.map(r => "." + r + ".").concat(SAB_BODY_PROFILE);
+const BACK_FRONT = ["..HHHHHHHHHHHH..", ".HHHHHHHHHHHHHH.", "HHHHHHHHHHHHHHHH", "HHHHHHHHHHHHHHHH", "HHHHHHHHHHHHHHHH", "HHHHHHHHHHHHHHHH", "HHHHHHHHHHHHHHHH", "HHHHHHHHHHHHHHHH", "HHHHHHHHHHHHHHHH", "HHHHHHHHHHHHHHHH", "HHHHHHHHHHHHHHHH", "HHHHHHHHHHHHHHHH", "HH............HH", "HH............HH", "HH............HH", "HH............HH", "HH............HH", "HH............HH"];
+const BACK_PROFILE = ["..HHHHHHHHHH....", ".HHHHHHHHHHHH....", "HHHHHHHHHHHHH...", "HHHHHHHHHHHH....", "HHHHHHHHHHHH....", "HHHHHHHHHHHH....", "HHHHHHHHHHHH....", "HHHHHHHHHHHH....", "HHHHHHHHHHHH....", "HHHHHHHHHHHH....", "HHHHHHHHHHHH....", "HHHHHHHHHHHH....", "HHHH............", "HHHH............", "HHHH............", "HHHH............", "HHHH............", "HHHH............"];
+const SAB_FRONT_COMP = compose(BACK_FRONT, SAB_FRONT_ROWS, 2);
+const SAB_RIGHT_COMP = compose(BACK_PROFILE, SAB_RIGHT_ROWS, 2);
+const PAL_SAB = {H:'#3a2016',S:'#f2c7a5',A:'#f2c7a5',K:'#2a1a12',W:'#ffffff',B:'#5b8fc7',N:'#c49478',P:'#d9776a',R:'#f08f8f',C:'#9fd3e6',J:'#3c5a80',D:'#2f2f36'};
+
+const BARMAN_ROWS = [
+  "....GGGGGG....",
+  "...GGGGGGGG...",
+  "..GGGGGGGGGG..",
+  ".GGGGGGGGGGGG.",
+  ".GKKGGGGGGKKG.",
+  ".GWEGGGGGGEWG.",
+  ".GGGGGGGGGGGG.",
+  ".GGGGGDDGGGGG.",
+  ".GGGGGGGGGGGG.",
+  ".GGGMMMMMMGGG.",
+  "..GGGGGGGGGG..",
+  "....GGGGGG....",
+  "..VVVVVVVVVV..",
+  "GVVVVVVVVVVVVG",
+  "GVVAAAAAAAAVVG",
+  "GVVAAAAAAAAVVG",
+  "GVVAAAAAAAAVVG",
+  "GVVAAAAAAAAVVG"
+];
+const PAL_BAR = {G:'#6fbf4a',K:'#2a3a1a',W:'#ffffff',E:'#1d1d1d',D:'#4a8a33',M:'#2a3a1a',V:'#3a3a3a',A:'#efe6d2'};
+
+/* ===================== DATA SCÉN ===================== */
+/* Akce: {say:[...]} {give:'id'} {take:'id'} {flag:'nazev'} {walk:x} {reels:true}
+         {if:{has:'id'}|{flag:'nazev'}, then:[...], else:[...]} */
+
+const SCENES = {
+  kap1: {
+    start: 60,
+    intro: [
+      { say: ['Hospoda, večer. Trochu hluku, trochu vůně piva.',
+              'Sabriela má žízeň. Za barem stojí barman a dívá se přímo na ni.'] }
+    ],
+    hotspots: [
+      { id: 'bar', x: 296, y: 50, w: 52, h: 80,
+        show: s => !s.flags.drinkDone,
+        stand: 292,
+        onTap: [
+          { say: ['Barman si tě měří přes sklenice.',
+                  '„Vypadáš, jako bys chtěla něco změnit. Jen o tom ještě nevíš.“',
+                  '„K tomu je potřeba kuráž. Dáš si něco na to?“'] },
+          { say: ['Dostaneš gin tonic. Chladný, s citronem. A najednou máš pocit, že to zvládneš.'] },
+          { flag: 'drinkDone' },
+          { say: ['Mezi sklenicemi ti vypadne mince a skutálí se na zem.'] }
+        ] },
+      { id: 'coin', x: 222, y: 146, w: 30, h: 22,
+        show: s => s.flags.drinkDone && !s.flags.coinTaken,
+        stand: 236,
+        onTap: [
+          { give: 'coin' },
+          { flag: 'coinTaken' },
+          { say: ['Mince! Tahle se ještě může hodit.'] }
+        ] },
+      { id: 'slot', x: 170, y: 40, w: 60, h: 128,
+        show: () => true,
+        stand: 150,
+        onTap: [
+          { if: { has: 'coin' },
+            then: [
+              { take: 'coin' },
+              { say: ['Vhazuješ minci. Automat zabzučí a začne se točit.'] },
+              { reels: true },
+              { flag: 'kap1Done' },
+              { say: ['Tři srdíčka! Automat ti vrací výhru.',
+                      'Kapitola 1 je splněná. Tohle byl jen začátek.',
+                      'Automat zablikal: „Vyber si hráče.“ To bude další obrazovka.'] },
+              { scene: 'kap2' }
+            ],
+            else: [
+              { say: ['Automat chce minci. Někde na zemi jedna asi leží.'] }
+            ] }
+        ] }
+    ]
+  }
+};
+
+/* ===================== POMOCNÉ KRESLENÍ ===================== */
+const R = (x, y, w, h, f, extra) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"${extra||''}/>`;
+const CELL = 2, GROUND = 160;
+
+function compose(back, front, off, offY){
+  offY = offY || 0;
+  const H = Math.max(back.length, front.length + offY), W = 16;
+  const out = [];
+  for (let r = 0; r < H; r++){
+    const row = Array(W).fill('.');
+    const b = back[r] || '';
+    for (let c = 0; c < b.length && c < W; c++) if (b[c] !== '.') row[c] = b[c];
+    const f = front[r - offY] || '';
+    for (let c = 0; c < f.length; c++){ const x = c + off; if (x < W && f[c] !== '.') row[x] = f[c]; }
+    out.push(row.join(''));
+  }
+  return out;
+}
+const ONDRA_HEAD_FRONT = ['.GGGGGGGGGG.','GGGGGGGGGGGG','GGSSSSSSSSGG','GSSSSSSSSSSG','SSEESSSSEESS','SSWBBWWBBWSS','SSSBBSSBBSSS','SSSSSNNSSSSS','SSSSSSSSSSSS','SSSSPPPPSSSS','SSSSSSSSSSSS','.SSSSSSSSSS.'];
+const ONDRA_BODY_FRONT = ['....SSSS....','ATTTTTTTTTTA','ATTTTTTTTTTA','ATTTTTTTTTTA','ATTTTTTTTTTA','.JJJJJJJJJJ.','.JJJJJJJJJJ.','.JJJJ..JJJJ.','.JJJJ..JJJJ.','.JJJJ..JJJJ.','.JJJJ..JJJJ.','..JJJ..JJJ..','..DDD..DDD..'];
+const PAL_ONDRA = {G:'#c9a46a',S:'#f0c09a',A:'#f0c09a',E:'#8a6a3a',W:'#ffffff',B:'#4f7fb0',N:'#d9a57c',P:'#b9685a',T:'#f7f7f5',J:'#3d4f6b',D:'#eeeeee'};
+const ONDRA_FRONT_COMP = compose([], ONDRA_HEAD_FRONT.concat(ONDRA_BODY_FRONT), 2);
+SCENES.kap2 = { hotspots: [] };
+const FEMALE_TONES = {hair:['#3a2016','#8a5a2b','#c9a46a','#b5452f','#1d1d1d'], top:['#9fd3e6','#e6a0b4','#a8d8a0','#f0d060','#c9a0e0'], jeans:['#3c5a80','#2d2d3a','#6b4a2b'], skin:['#f2c7a5','#e0b08a','#c98f6b']};
+const MALE_TONES = {hair:['#c9a46a','#5a3323','#2a1a12','#b5452f'], top:['#2a6fa8','#8a2b2b','#3a7a3a','#e0a030','#7a7a8a'], jeans:['#3d4f6b','#2d2d3a','#6b4a2b'], skin:['#f2c7a5','#e0b08a','#c98f6b']};
+const pick1 = arr => arr[Math.floor(Math.random() * arr.length)];
+function shuffle(arr){ for (let i = arr.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+function decoyFemale(){
+  const sk = pick1(FEMALE_TONES.skin);
+  return { rows: SAB_FRONT_COMP, pal: Object.assign({}, PAL_SAB, { H: pick1(FEMALE_TONES.hair), S: sk, A: sk, C: pick1(FEMALE_TONES.top), J: pick1(FEMALE_TONES.jeans) }), ok: false };
+}
+function decoyMale(){
+  const sk = pick1(MALE_TONES.skin), hair = pick1(MALE_TONES.hair);
+  return { rows: ONDRA_FRONT_COMP, pal: Object.assign({}, PAL_ONDRA, { G: hair, E: hair, S: sk, A: sk, T: pick1(MALE_TONES.top), J: pick1(MALE_TONES.jeans) }), ok: false };
+}
+function buildKap2(){
+  const p1 = shuffle([{ rows: SAB_FRONT_COMP, pal: PAL_SAB, ok: true }, decoyFrom(DECOY_F[0]), decoyFrom(DECOY_F[1]), decoyFrom(DECOY_F[2])]);
+  const p2 = shuffle([{ rows: ONDRA_FRONT_COMP, pal: PAL_ONDRA, ok: true }, decoyFrom(DECOY_M[0]), decoyFrom(DECOY_M[1]), decoyFrom(DECOY_M[2])]);
+  state.cards = { p1: p1, p2: p2 };
+  const list = [];
+  p1.forEach((c, i) => list.push({ id: 'p1_' + i, x: 6 + i * 48, y: 44, w: 44, h: 66, show: s => !s.flags.p1ok, onTap: [{ pick: { player: 1, ok: c.ok } }] }));
+  p2.forEach((c, i) => list.push({ id: 'p2_' + i, x: 206 + i * 48, y: 44, w: 44, h: 66, show: s => s.flags.p1ok && !s.flags.p2ok, onTap: [{ pick: { player: 2, ok: c.ok } }] }));
+  return list;
+}
+function cardsMarkup(){
+  let s = R(0, 0, 400, 180, '#101030');
+  for (let y = 0; y < 180; y += 12) s += R(0, y, 400, 1, '#16164a');
+  s += R(0, 0, 400, 28, '#ff5c8a');
+  s += "<text x='200' y='18' text-anchor='middle' font-size='10' font-weight='700' fill='#fff8e7'>PŘÍBĚHÁŘ · VÝBĚR HRÁČU</text>";
+  const cards = (list, base, flag) => list.map((c, i) => {
+    const x = base + i * 48;
+    const hi = state.flags[flag] && c.ok;
+    return R(x, 44, 44, 66, hi ? '#ffd27a' : '#3b3560') + R(x + 2, 46, 40, 62, '#2b2250') +
+      `<g transform='translate(${x + 6},52)'>${spriteMarkup(c.rows, c.pal, false, 2)}</g>`;
+  }).join('');
+  s += cards(state.cards.p1, 6, 'p1ok') + cards(state.cards.p2, 206, 'p2ok');
+  s += "<text x='6' y='38' font-size='10' fill='#fff8e7'>P1</text><text x='206' y='38' font-size='10' fill='#fff8e7'>P2</text>";
+  return s;
+}
+function pick(p, next){
+  if (!p.ok) return say([p.player === 1 ? 'Opravdu by sis chtěla strávit život s tímhle?' : 'Opravdu by sis chtěl strávit život s tímhle?'], next);
+  if (p.player === 1){ state.flags.p1ok = true; renderObjs(); refreshQuest(); return say(['Tak tohle je ona.'], next); }
+  state.flags.p2ok = true; renderObjs(); refreshQuest();
+  return say(['Tak tohle je on.', 'Dobrá volba. Tahle hra se hraje ve dvou.'], () => { state.flags.kap2Done = true; exec({ scene: 'map' }, next); });
+}
+const ELF_BACK = ['................','................','................','S..............S','SS............SS','S..............S'];
+const MAGE_BACK = ['......VVVV......','....VVVVVVVV....','...VVVVVVVVVV...','VVVVVVVVVVVVVVVV'];
+const KNIGHT_BACK = ['......MMMM......','....MMMMMMMM....','...MMMMMMMMMM...','MMMMMMMMMMMMMMMM'];
+const DWARF_BACK = ['................','................','................','................','................','................','................','................','EE............EE','EE............EE','EE............EE','EE............EE','EEE..........EEE'];
+const DECOY_F = [
+  { back: ELF_BACK, offY: 0, base: SAB_FRONT_ROWS, basePal: PAL_SAB, pal: { H: '#e6e6f0', S: '#f5e6d3', A: '#f5e6d3', C: '#2f6b4f', J: '#3a2e4a' } },
+  { back: MAGE_BACK, offY: 4, base: SAB_FRONT_ROWS, basePal: PAL_SAB, pal: { H: '#c9552f', C: '#5b3a8a', J: '#2a2a4a', V: '#6a2fa0' } },
+  { back: ELF_BACK, offY: 0, base: SAB_FRONT_ROWS, basePal: PAL_SAB, pal: { H: '#2a5a3a', S: '#9fd49a', A: '#9fd49a', C: '#8a5a2a', J: '#4a3a2a', B: '#f0c040' } }
+];
+const DECOY_M = [
+  { back: DWARF_BACK, offY: 0, base: ONDRA_HEAD_FRONT.concat(ONDRA_BODY_FRONT), basePal: PAL_ONDRA, pal: { G: '#8a5a2b', E: '#b5452f', S: '#e0b08a', A: '#e0b08a', T: '#5a6a7a', J: '#3a3a3a' } },
+  { back: [], offY: 0, base: ONDRA_HEAD_FRONT.concat(ONDRA_BODY_FRONT), basePal: PAL_ONDRA, pal: { G: '#1d1d1d', E: '#1d1d1d', S: '#6f9a3c', A: '#6f9a3c', T: '#5a3a2a', J: '#2a2a2a' } },
+  { back: KNIGHT_BACK, offY: 4, base: ONDRA_HEAD_FRONT.concat(ONDRA_BODY_FRONT), basePal: PAL_ONDRA, pal: { G: '#4a3a2a', E: '#4a3a2a', S: '#e8c4a0', A: '#e8c4a0', T: '#6b7480', J: '#3a3a3a', M: '#9aa3ad' } }
+];
+function decoyFrom(spec){
+  return { rows: compose(spec.back, spec.base, 2, spec.offY), pal: Object.assign({}, spec.basePal, spec.pal), ok: false };
+}
+const CHAT_TALK = [
+  { say: ['Chatička. Dveře jsou pootevřené a z kamen táhne teplo.'] },
+  { ask: { q: 'Co bys dělala na chatičce? Nemáš náhodou být na firemní chatě?', opts: [
+    { text: 'Ano', ok: true },
+    { text: 'Ne, mám volno', ok: false, reply: 'Tak to asi šef neví. Zkus to znovu.' },
+    { text: 'Nevím', ok: false, reply: 'Podívej se do kalendáře, než to řekneš.' }
+  ] } },
+  { ask: { q: 'Chtěla bys i přesto někam utéct s Ondrou?', opts: [
+    { text: 'Ano', ok: true },
+    { text: 'Ne', ok: false, reply: 'Dobře, tak zůstaneme. Ale v Ondrově pohledu je vidět, že by odjel hned.' },
+    { text: 'Možná', ok: false, reply: 'Možná je pořád jen slovo. Zkus to říct počctivě.' }
+  ] } }
+];
+const CHAT_FULL = CHAT_TALK.concat([{ flag: 'kap3Done' }, { say: ['Tak jo. Sbalíme věci a jedeme.'] }, { scene: 'chata' }]);
+SCENES.map = { hotspots: [] };
+function mapHotspots(){
+  return [
+    { id: 'marry2n', x: 40, y: 118, w: 70, h: 30, show: s => s.flags.bazenDone, onTap: [{ fade: true }, { scene: 'marry2' }] },
+    { id: 'olom', x: 140, y: 116, w: 70, h: 36, show: s => s.flags.bazenDone, onTap: [{ fade: true }, { scene: 'olomIntro' }, { scene: 'olomLoft' }] },
+    { id: 'kopr', x: 288, y: 110, w: 84, h: 48, show: s => s.flags.kap3Done, onTap: [{ scene: 'kopriv' }] },
+    { id: 'tromso', x: 110, y: 150, w: 56, h: 28, show: s => s.flags.loftDone && !s.flags.tromsoDone, onTap: [{ fade: true }, { flight: true }, { ski: true }] },
+    { id: 'kapr', x: 222, y: 150, w: 56, h: 28, show: s => s.flags.loftDone, onTap: [{ say: ['Kaprun v Rakousku zatím není otevřený.'] }] },
+    { id: 'marry', x: 56, y: 44, w: 56, h: 72, show: () => true, onTap: [{ say: ['Tady to začalo. Tuhle zastávku už máš za sebou.'] }] },
+    { id: 'chatka', x: 252, y: 44, w: 90, h: 72, show: s => s.flags.kap1Done, onTap: [{ if: { flag: 'kap3Done' }, then: [{ say: ['Chatička je hotová.'] }], else: CHAT_FULL }] }
+  ];
+}
+function mapMarkup(s){
+  let o = R(0, 0, 400, 180, '#1e3a2a');
+  for (let y = 0; y < 180; y += 12) o += R(0, y, 400, 1, '#24463a');
+  o += R(0, 0, 400, 22, '#ff5c8a') + "<text x='200' y='15' text-anchor='middle' font-size='10' font-weight='700' fill='#fff8e7'>PŘÍBĚHÁŘ · MAPA</text>";
+  for (let i = 0; i <= 20; i++) o += R(112 + i * 8, 98 - Math.round(i * 0.8), 4, 4, '#d9b56a');
+  o += R(60, 50, 44, 10, '#7a4a2a') + R(62, 60, 40, 26, '#c0392b') + R(76, 70, 8, 16, '#3a2016') + R(92, 46, 6, 8, '#3fbf5f');
+  o += "<text x='82' y='100' text-anchor='middle' font-size='9' font-weight='700' fill='#fff8e7'>MARRY</text>";
+  const kd = s.flags.kap3Done, avail = s.flags.kap1Done;
+  if (avail && !kd) o += R(250, 42, 94, 76, '#ffd27a') + R(252, 44, 90, 72, '#1e3a2a');
+  o += R(262, 60, 56, 32, '#8a5a2a') + R(258, 50, 64, 12, '#4a2a1a') + R(272, 70, 10, 8, '#ffd27a') + R(296, 74, 10, 18, '#3a2016') + R(330, 58, 10, 30, '#2e7d4f') + R(324, 46, 22, 16, '#2e7d4f');
+  o += "<text x='292' y='108' text-anchor='middle' font-size='9' font-weight='700' fill='#fff8e7'>CHATIČKA</text>";
+  if (kd) o += R(330, 40, 10, 10, '#3fbf5f');
+    o += mapExtrasMarkup(s);
+  const oOn = s.flags.bazenDone;
+  o += R(140,116,70,36, oOn ? '#ffd27a' : '#5a6a6a') + R(142,118,66,32,'#1e3a2a') + R(158,126,34,20, oOn ? '#8a5a2a' : '#4a4a4a');
+  o += "<text x='175' y='170' text-anchor='middle' font-size='9' font-weight='700' fill='#fff8e7'>OLOMOUC</text>";
+  const kOn = s.flags.kap3Done;
+  if (kOn) o += R(288, 110, 84, 48, '#ffd27a') + R(290, 112, 80, 44, '#1e3a2a');
+  o += R(296, 128, 70, 30, kOn ? '#e8f4ff' : '#5a6a6a');
+  for (let i = 0; i < 10; i++) o += R(296 + i * 6, 128 + i * 2, 6, 30 - i * 2, kOn ? '#c9dff0' : '#4a5a5a');
+  o += R(346, 104, 2, 30, '#888') + R(348, 104, 6, 2, '#888');
+  if (s.flags.loftDone){ o += R(222,150,56,26,'#ffd27a') + R(224,152,52,22,'#1e3a2a') + "<text x='250' y='166' text-anchor='middle' font-size='9' font-weight='700' fill='#fff8e7'>KAPRUN</text>"; }
+  if (s.flags.loftDone && !s.flags.tromsoDone){ o += R(110,150,56,26,'#9fd3ff') + R(112,152,52,22,'#1e2f4a') + "<text x='138' y='166' text-anchor='middle' font-size='9' font-weight='700' fill='#fff8e7'>TROMSØ</text>"; }
+  o += "<text x='330' y='170' text-anchor='middle' font-size='9' font-weight='700' fill='#fff8e7'>KOPŘIVNA</text>";
+  if (kOn) o += R(340, 96, 6, 6, '#3fbf5f');
+  return o;
+}
+function ask(q, opts, next){
+  state.busy = true;
+  $('dlg').hidden = false;
+  $('dlgHint').style.display = 'none';
+  $('dlgText').textContent = q;
+  const box = $('dlgChoices');
+  box.innerHTML = '';
+  opts.forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'choice';
+    b.textContent = o.text;
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      box.innerHTML = '';
+      if (o.ok){ $('dlg').hidden = true; state.busy = false; next(); }
+      else say([o.reply], () => ask(q, opts, next));
+    });
+    box.appendChild(b);
+  });
+}
+const ONDRA_HEAD_PROF = ['..GGGGGGG.','.GGGGGGGGG','GGGGGSSSSS','GGGSSSSSSS','GGSSEESSSS','GGSSSBSSSS','GGSSSSSSSS','GGSSSSSSNS','GGSSSSSSSS','GGSSSSPPSS','GGSSSSSSSS','.GSSSSSSS.'];
+const ONDRA_BODY_PROF = ['....SSSS....','..TTTTTTTTA.','..TTTTTTTTS.','..TTTTTTTTS.','..JJJJJJJJJ.','..JJJJJJJJJ.','..JJJJ.JJJJ.','..JJJJ.JJJJ.','..JJJJ.JJJJ.','...JJJ.JJJ..','..DDDD.DDD..','..DDDD.DDD..'];
+const ONDRA_RIGHT_COMP = compose([], ONDRA_HEAD_PROF.map(r => '.' + r + '.').concat(ONDRA_BODY_PROF), 2);
+const CHAT_INTRO = ['Chata na kopci. Je tma a slunce zapadlo za lesy.', 'Přijeli jste oba. Oheň se sám nerozdělá.', 'Přepínací tlačítko nahoře přepíná postavu. Sabriela má posvítit Ondrovi. Ondra má najít sekyrku a nasekat dříví.'];
+SCENES.chata = { hotspots: [] };
+function inBox(p, h){
+  const x = typeof h.x === 'function' ? h.x(state) : h.x;
+  const y = typeof h.y === 'function' ? h.y(state) : h.y;
+  return p.x >= x && p.x <= x + h.w && p.y >= y && p.y <= y + h.h;
+}
+function chataHotspots(){
+  return [
+    { id: 'svetlo', x: 258, y: 108, w: 20, h: 12, show: s => s.active === 'sab' && !s.flags.svetloTaken, stand: 262, onTap: [{ give: 'svetlo' }, { flag: 'svetloTaken' }, { say: ['Svítilna. Zkus ji zapnout u Ondry.'] }] },
+    { id: 'ondra', x: s => s.pos.ond - 16, y: 110, w: 32, h: 50, show: s => s.active === 'sab' && s.inv.includes('svetlo'), stand: s => s.pos.ond + 28, onTap: [{ if: { flag: 'lightOn' }, then: [{ say: ['Světlo už svítí.'] }], else: [{ flag: 'lightOn' }, { say: ['Zapínam svítilnu a světlo dopadá na Ondru. Vidí na zem i na sekeru.'] }] }] },
+    { id: 'axe', x: 298, y: 132, w: 20, h: 14, show: s => s.active === 'ond' && !s.flags.axeTaken, stand: 306, onTap: [{ give: 'axe' }, { flag: 'axeTaken' }, { say: ['Sekyrka. Trochu zrezivělá, ale půjde to.'] }] },
+    { id: 'stump', x: 294, y: 126, w: 32, h: 24, show: s => s.active === 'ond' && s.flags.axeTaken && !s.flags.woodDone, stand: 302, onTap: [{ if: { flag: 'lightOn' }, then: [{ say: ['Sekáš do dřeva. Rána za ranou, až to zapraská.'] }, { give: 'wood' }, { flag: 'woodDone' }, { flag: 'chataDone' }, { say: ['Dřevo je nasekané. Pojďme dovnitř, je tam zima.'] }, { scene: 'interier' }], else: [{ say: ['Je tma. Nevidím, kam sekat. Potřebuju světlo.'] }] }] },
+    { id: 'fire', x: 116, y: 144, w: 44, h: 28, show: s => s.active === 'ond' && !s.flags.fireLit, stand: 132, onTap: [{ if: { flag: 'woodDone' }, then: [{ if: { flag: 'lightOn' }, then: [{ say: ['Pár třísek a trocha trpělivosti. Plamen konečně chytá.'] }, { flag: 'fireLit' }, { flag: 'chataDone' }, { say: ['Oheň hoří. Je teplo a je vidět.'] }], else: [{ say: ['Nevidím, kam mám zapalovat. Potřebuju světlo.'] }] }], else: [{ say: ['Nejdřív potřebuju dříví.'] }] }] }
+  ];
+}
+function chataMarkup(s){
+  let o = R(0,0,400,60,'#1b2338') + R(0,60,400,40,'#232c44') + R(0,100,400,32,'#2b3450');
+  for (let i = 0; i < 9; i++){ const x = 6 + i * 22, top = 18 + (i % 3) * 12; o += R(x+4, top+10, 4, 120, '#1d2a1e') + R(x, top, 12, 12, '#1d2a1e') + R(x+2, top-6, 8, 6, '#1d2a1e'); }
+  o += R(0,130,400,50,'#2a3a24') + R(0,150,400,30,'#22301e');
+  o += R(200,34,200,10,'#3a2a20') + R(200,44,200,86,'#9a6a3a');
+  for (let y = 50; y < 130; y += 6) o += R(200, y, 200, 1, '#7a5230');
+  o += R(240,62,40,36,'#6b4a2b') + R(244,66,32,28,'#e8a84a') + R(262,66,1,28,'#6b4a2b');
+  o += R(180,124,110,8,'#7a5230') + R(170,130,10,10,'#6b4a2b') + R(164,136,10,8,'#5a3a20');
+  o += R(262,116,26,6,'#6b4a2b') + R(264,122,3,8,'#4a3020') + R(283,122,3,8,'#4a3020');
+  o += R(330,118,60,22,'#8a5a2a');
+  for (let x = 330; x < 390; x += 6) o += R(x, 118, 1, 22, '#5a3a20');
+  o += R(350,96,8,40,'#e8e0d0') + R(352,104,2,2,'#333') + R(355,116,2,2,'#333');
+  if (!s.flags.axeTaken) o += R(304,134,2,10,'#6b4a2b') + R(300,132,10,4,'#9aa3ad');
+  o += R(296,140,28,14,'#a06a3a') + R(298,140,24,2,'#c08a50');
+  o += R(180,160,20,8,'#8a8a8a') + R(210,166,22,8,'#8a8a8a') + R(176,172,18,6,'#8a8a8a');
+  o += R(80,156,20,6,'#6b4a2b');
+  o += R(114,164,46,4,'#6a6a6a') + R(114,150,4,14,'#6a6a6a') + R(156,150,4,14,'#6a6a6a') + R(122,158,30,6,'#5a3a20');
+  if (s.flags.fireLit) o += "<g style='animation:pulse 0.8s ease-in-out infinite'>" + R(128,140,6,14,'#ff8c2a') + R(134,132,6,22,'#ffd27a') + R(140,140,6,14,'#ff8c2a') + '</g>';
+  if (!s.flags.svetloTaken) o += R(262,112,8,4,'#333') + R(270,113,2,2,'#ffe066');
+  if (!s.flags.lightOn && !s.flags.fireLit) o += R(0,0,400,180,'#000',' opacity="0.55"');
+  if (s.flags.lightOn) o += R(60,100,120,60,'#ffe9a0',' opacity="0.14"');
+  if (s.flags.fireLit) o += R(90,96,160,70,'#ffb347',' opacity="0.12"');
+  return o;
+}
+function chataQuest(){
+  if (state.flags.chataDone) return 'Hotovo';
+  const t = [];
+  if (!state.flags.svetloTaken) t.push('Sabriela: vezmi svítilnu');
+  else if (!state.flags.lightOn) t.push('Sabriela: posviť Ondrovi');
+  if (!state.flags.axeTaken) t.push('Ondra: najdi sekyrku');
+  else if (!state.flags.woodDone) t.push('Ondra: nasekej dříví');
+  else if (!state.flags.fireLit) t.push('Ondra: rozdělej oheň');
+  return 'Úkol: rozdělat oheň · ' + t.join(' · ');
+}
+function switchActive(){
+  state.pos[state.active] = state.x;
+  state.target = null; state.onArrive = null;
+  const nxt = state.active === 'sab' ? 'ond' : 'sab'; if (state.flags['inBed_' + nxt]) return; state.active = nxt;
+  state.x = state.pos[state.active];
+  state.pose = '';
+  setPose('front');
+  placeChar();
+  refreshInv();
+  refreshQuest();
+}
+const PAL_SAB_HOME = Object.assign({}, PAL_SAB, { C: '#8a8f98', J: '#6b6f78' });
+const INTERIER_INTRO = ['Chata uvnitř. Je tu zima a z okna padá světlo.', 'Ondra má rozdělat oheň v kamnech. Sabriela mu přinese zápalky a převlékne se do mikiny a teplákům.'];
+SCENES.interier = { hotspots: [] };
+function interierHotspots(){
+  return [
+    { id: 'clothes', x: 56, y: 72, w: 30, h: 18, show: s => s.active === 'sab' && !s.flags.prevlecena, stand: 72, onTap: [{ flag: 'prevlecena' }, { sabRedraw: true }, { say: ['Mikina a tepláky. Konečně pohoda.'] }, { if: { flag: 'stoveLit' }, then: [{ flag: 'interierDone' }], else: [] }] },
+    { id: 'matches', x: 232, y: 54, w: 36, h: 16, show: s => s.active === 'sab' && !s.flags.zapalkyTaken, stand: 240, onTap: [{ give: 'zapalky' }, { flag: 'zapalkyTaken' }, { say: ['Zápalky. Dobře, ať se Ondra nepopálí.'] }] },
+    { id: 'stove', x: 296, y: 92, w: 68, h: 84, show: s => s.active === 'ond' && !s.flags.stoveLit, stand: 284, onTap: [{ if: { has: 'wood' }, then: [{ if: { has: 'zapalky' }, then: [{ flag: 'stoveLit' }, { say: ['Vkládáš dříví a zapaluješ zápalkou. Pomalu se rozhoří.'] }, { if: { flag: 'prevlecena' }, then: [{ flag: 'interierDone' }], else: [] }], else: [{ say: ['Dřevo je v kamnech, ale potřebuješ zápalky.'] }] }], else: [{ say: ['Nejdřív potřebuješ dříví.'] }] }] }
+  ];
+}
+function interierMarkup(s){
+  let o = R(0,0,400,120,'#9a6a3a');
+  for (let y = 6; y < 120; y += 8) o += R(0, y, 400, 1, '#7a5230');
+  o += R(0,0,400,12,'#6b4a2b');
+  o += R(20,30,60,50,'#3a2a20') + R(24,34,52,42,'#8ab4c8') + R(30,60,20,16,'#2e4a2a');
+  o += R(120,44,8,60,'#6b4a2b') + R(40,96,110,22,'#8a5a2a') + R(44,88,102,10,'#c8d0dc') + R(40,84,80,12,'#3a4a6a');
+  if (!s.flags.prevlecena) o += R(60,76,18,10,'#8a8f98') + R(62,74,14,4,'#6b6f78');
+  o += R(228,68,40,4,'#8a5a2a') + R(228,72,2,6,'#6b4a2b') + R(248,56,4,12,'#2e5a3a');
+  if (!s.flags.zapalkyTaken) o += R(236,60,6,6,'#c0392b') + R(244,60,6,6,'#c0392b');
+  o += R(322,50,8,44,'#222') + R(316,50,20,4,'#222');
+  o += R(296,94,64,8,'#333') + R(300,100,56,46,'#222') + R(308,112,28,20,'#111');
+  if (s.flags.stoveLit) o += R(310,114,24,16,'#ff8c2a');
+  o += R(302,146,4,12,'#222') + R(346,146,4,12,'#222');
+  o += R(362,108,2,40,'#333') + R(368,112,2,36,'#333');
+  o += R(262,120,30,20,'#6b4a2b') + R(264,124,26,3,'#a06a3a') + R(264,130,26,3,'#a06a3a');
+  o += R(0,120,400,60,'#5a3a20');
+  for (let x = 0; x < 400; x += 40) o += R(x, 120, 1, 60, '#4a3018');
+  o += R(4,138,60,6,'#7a5230') + R(30,144,3,30,'#333');
+  if (s.flags.stoveLit) o += R(0,0,400,180,'#ff9a3a',' opacity="0.10"');
+  return o;
+}
+function interierQuest(){
+  if (state.flags.interierDone) return 'Hotovo';
+  const t = [];
+  if (!state.flags.zapalkyTaken) t.push('Sabriela: přines zápalky');
+  if (!state.flags.prevlecena) t.push('Sabriela: převleč se');
+  if (!state.flags.stoveLit) t.push('Ondra: rozdělej oheň v kamnech');
+  return 'Úkol: teplo v chatě · ' + t.join(' · ');
+}
+const INTERIER_INTRO2 = ['Chata uvnitř. Venku svítí hvězdičky, uvnitř je tma.', 'Ondra musí rozdělat oheň v kamnech. Sabriela má svítilnu a musí najít zápalky.'];
+function heartPop(){
+  const HEART = ['.RR..RR.','RRRRRRRR','RRRRRRRR','RRRRRRRR','.RRRRRR.','..RRRR..','...RR...'];
+  let rects = '';
+  HEART.forEach((row, r) => row.split('').forEach((ch, c) => { if (ch === 'R') rects += `<rect x='${c}' y='${r}' width='1' height='1' fill='#ff5c8a'/>`; }));
+  const d = document.createElement('div');
+  d.style.cssText = 'position:absolute;left:50%;top:38%;width:40px;height:40px;transform:translate(-50%,0);pointer-events:none;animation:rise 1.8s ease-out forwards;z-index:6';
+  d.innerHTML = `<svg width='40' height='40' viewBox='0 0 8 8' shape-rendering='crispEdges'>${rects}</svg>`;
+  $('wrap').appendChild(d);
+  setTimeout(() => d.remove(), 2000);
+}
+function interierHotspots2(){
+  return [
+    { id: 'svitilna', x: s => s.pos.ond - 16, y: 110, w: 32, h: 50, show: s => s.active === 'sab' && s.inv.includes('svetlo') && !s.flags.svitiNaOndru, stand: s => s.pos.ond + 28, onTap: [{ flag: 'svitiNaOndru' }, { say: ['Svítím Ondrovi na ruce. Teď něco vidí.'] }] },
+    { id: 'matches', x: 228, y: 50, w: 36, h: 18, show: s => s.active === 'sab' && s.inv.includes('svetlo') && !s.flags.zapalkyTaken, stand: 240, onTap: [{ give: 'zapalky' }, { flag: 'zapalkyTaken' }, { say: ['Zápalky na políčce. Našla jsi je.'] }] },
+    { id: 'bed', x: 14, y: 84, w: 232, h: 50, show: s => s.flags.interierDone && s.active && !s.flags['inBed_' + s.active], stand: 120, onTap: [{ bed: true }] },
+      { id: 'basket', x: 258, y: 116, w: 34, h: 24, show: s => s.active === 'ond' && s.flags.svitiNaOndru && !s.flags.triskyTaken, stand: 268, onTap: [{ give: 'trisky' }, { flag: 'triskyTaken' }, { say: ['Třísky z košíku. Na podpal to bude akorát.'] }] },
+    { id: 'stove', x: 296, y: 92, w: 68, h: 84, show: s => s.active === 'ond' && !s.flags.interierDone, stand: 284, onTap: [
+      { if: { flag: 'svitiNaOndru' }, then: [
+        { if: { flag: 'dvirkaOpen' }, then: [
+          { if: { has: 'wood' }, then: [
+            { if: { has: 'trisky' }, then: [
+              { if: { has: 'zapalky' }, then: [{ flag: 'stoveLit' }, { heart: true }, { say: ['Plamen chytá. Ve tmě se rozsvítí celá místnost.'] }, { flag: 'interierDone' }], else: [{ say: ['Dřevo a třísky máš, ale potřebuješ zápalky.'] }] }
+            ], else: [{ say: ['Třísky by se hodily. Sbírej je v košíku.'] }] }
+          ], else: [{ say: ['Dřevo ještě chybí.'] }] }
+        ], else: [{ flag: 'dvirkaOpen' }, { say: ['Otevíráš dvířka. Uvnitř je prázdno a čeká na oheň.'] }] }
+      ], else: [{ say: ['Je tma. Nevidím, co dělám.'] }] }
+    ] }
+  ];
+}
+function interierMarkup2(s){
+  let o = R(0,0,400,120,'#3a2418');
+  for (let y = 6; y < 120; y += 8) o += R(0, y, 400, 1, '#2e1c12');
+  o += R(0,0,400,12,'#2a1a10') + R(0,120,400,60,'#3a2716');
+  for (let x = 0; x < 400; x += 40) o += R(x, 120, 1, 60, '#2e1f12');
+  o += R(20,24,64,52,'#1a120c') + R(24,28,56,44,'#0d1528');
+  o += R(4,56,10,74,'#4a2e18') + R(10,96,240,44,'#5a3a20');
+  o += R(14,86,232,14,'#d9d2c2') + R(14,96,232,30,'#2e3f5e') + R(14,104,232,2,'#3e5278');
+  o += R(18,84,44,12,'#efe9dc') + R(68,84,44,12,'#efe9dc') + R(170,100,70,12,'#8a3a4a');
+  o += R(228,66,40,4,'#5a3a20') + R(228,70,2,6,'#4a2e18') + R(248,54,4,12,'#2e4a2a');
+  if (!s.flags.zapalkyTaken) o += R(236,58,6,6,'#c0392b') + R(244,58,6,6,'#c0392b');
+  o += R(322,46,8,46,'#111') + R(296,92,68,8,'#222') + R(300,100,60,46,'#111') + R(308,112,28,20,'#080808');
+  if (s.flags.stoveLit) o += R(310,114,24,16,'#ff8c2a');
+  o += R(258,116,34,24,'#4a2e18') + R(260,120,30,2,'#7a5230') + R(260,128,30,2,'#7a5230');
+  if (!s.flags.stoveLit){ if (s.flags.svitilnaZapnuta) o += torchMaskSVG(s.pos.sab, 112); else o += R(0,0,400,180,'#000',' opacity="0.86"'); }
+  if (s.flags.svitiNaOndru && !s.flags.stoveLit) o += R(70,96,90,64,'#ffe9a0',' opacity="0.25"');
+  if (s.flags.stoveLit) o += R(0,0,400,180,'#ff9a3a',' opacity="0.16"') + R(260,70,120,100,'#ffb347',' opacity="0.14"');
+  [[30,34],[46,40],[62,36],[38,52],[70,50],[52,62],[32,66],[66,68]].forEach(([x,y]) => o += R(x,y,2,2,'#ffffff'));
+  return o;
+}
+function interierQuest2(){
+  if (state.flags.bedDone) return 'Hotovo';
+  if (state.flags.interierDone) return 'Úkol: zalezte do postele, každý zvlášť';
+  const t = [];
+  if (!state.flags.svitiNaOndru) t.push('Sabriela: posviť Ondrovi');
+  if (!state.flags.zapalkyTaken) t.push('Sabriela: najdi zápalky');
+  if (!state.flags.triskyTaken) t.push('Ondra: nasbírej třísky');
+  if (!state.flags.dvirkaOpen) t.push('Ondra: otevři dvířka');
+  if (!state.flags.stoveLit) t.push('Ondra: vlož dříví a zapal');
+  return 'Úkol: rozdělat oheň ve tmě · ' + t.join(' · ');
+}
+function auraMarkup(){
+  return ((state.sceneId === 'interier' || state.sceneId === 'kopriv') && state.flags.svitilnaZapnuta) ? R(-14,-8,60,68,'#ffe9a0',' opacity="0.22"') + R(-6,-2,44,60,'#ffe9a0',' opacity="0.18"') : '';
+}
+function redrawBoth(){
+  const cur = state.active;
+  state.active = 'sab'; state.pose = ''; setPose('front');
+  state.active = cur; state.pose = ''; setPose('front');
+}
+function toggleTorch(){
+  state.flags.svitilnaZapnuta = !state.flags.svitilnaZapnuta;
+  if (state.flags.svitilnaZapnuta) state.flags.svitiNaOndru = true;
+  redrawBoth(); renderObjs(); refreshInv(); refreshQuest();
+}
+function heartBig(){
+  const HEART = ['.RR..RR.','RRRRRRRR','RRRRRRRR','RRRRRRRR','.RRRRRR.','..RRRR..','...RR...'];
+  let rects = '';
+  HEART.forEach((row, r) => row.split('').forEach((ch, c) => { if (ch === 'R') rects += `<rect x='${c}' y='${r}' width='1' height='1' fill='#ff5c8a'/>`; }));
+  const d = document.createElement('div');
+  d.style.cssText = 'position:absolute;left:50%;top:40%;width:96px;height:96px;transform:translate(-50%,-50%);pointer-events:none;animation:pulseHeart 1.6s ease-out forwards;z-index:7';
+  d.innerHTML = `<svg width='96' height='96' viewBox='0 0 8 8' shape-rendering='crispEdges'>${rects}</svg>`;
+  $('wrap').appendChild(d);
+  setTimeout(() => d.remove(), 4000);
+}
+function torchMaskSVG(cx, cy){
+  const rx = 84, ry = 62, c = 6;
+  let holes = '';
+  for (let y = cy - ry; y <= cy + ry; y += c) for (let x = cx - rx; x <= cx + rx; x += c){
+    const dx = (x + c / 2 - cx) / rx, dy = (y + c / 2 - cy) / ry;
+    if (dx * dx + dy * dy <= 1) holes += `<rect x='${x}' y='${y}' width='${c}' height='${c}' fill='#000'/>`;
+  }
+  return `<defs><mask id='torch'><rect x='0' y='0' width='400' height='180' fill='#fff'/>${holes}</mask></defs><rect x='0' y='0' width='400' height='180' fill='#000' opacity='0.86' mask='url(#torch)'/>`;
+}
+const KOPRIV_NPCS = [{x:110,y:92,c:'#c0392b'},{x:150,y:122,c:'#2e7d4f'},{x:196,y:86,c:'#5b3a8a'},{x:236,y:124,c:'#e0a030'},{x:272,y:90,c:'#3a7a3a'},{x:336,y:118,c:'#8a2b2b'},{x:56,y:124,c:'#2a6fa8'},{x:300,y:146,c:'#c08070'}];
+const KOPRIV_INTRO = ['Kopřivna. Bar je plný lidí a hudba hraje nahlas.', 'Ondra je tady někde. Ve tmě ho bude těžké najít.'];
+const RAVEN_ROWS = ['....KKKKKK......','...KKKKKKKK.....','..KKKKKKKKKK....','..KKKKKKKKKKK...','.KKKKKKKKKKKKK..','.KKKKWKKKKKKKK..','.KKKKKKKKKKKKKY.','KKKKKKKKKKKKKYY.','KKKKKKKKKKKKKK..','.KKKKKKKKKKKKK..','..KKKKKKKKKKK...','...KKKKKKKKK....','....KKKKKKK.....','......KKKK......'];
+const PAL_RAVEN = {K:'#1d1d1d',W:'#ffffff',Y:'#f1c40f'};
+SCENES.kopriv = { hotspots: [] };
+function personMarkup(x, y, c){ return R(x,y,8,8,'#e0b08a') + R(x-2,y+8,12,14,c) + R(x-2,y+22,5,6,'#222') + R(x+5,y+22,5,6,'#222'); }
+function koprivMarkup(s){
+  let o = R(0,0,400,180,'#14101e') + R(0,0,90,50,'#a33a2a',' opacity="0.7"');
+  o += R(250,20,150,40,'#2a1c14');
+  const cols = ['#2e7d4f','#8e3b2d','#d9a441','#2e4f7d'];
+  for (let i = 0, x = 262; x < 396; i++, x += 10) o += R(x,26,6,14,cols[i % 4]);
+  o += R(250,60,150,6,'#6b4a2b') + R(20,50,60,4,'#e8e8e8') + R(48,54,4,20,'#555') + R(0,150,400,30,'#1a1520');
+  (s.crowd || []).forEach(c => o += `<g transform='translate(${c.x - 16},${c.y - 50})'>${spriteMarkup(c.rows, c.pal, false, 2)}</g>`);
+  if (s.flags.svitilnaZapnuta) o += torchMaskSVG(s.pos.sab, 112); else o += R(0,0,400,180,'#000',' opacity="0.86"');
+  return o;
+}
+function koprivHotspots(){
+  const list = KOPRIV_NPCS.map((n, i) => {
+    if (i === 0) return { id: 'fake', x: n.x - 6, y: n.y, w: 20, h: 36, show: () => true, stand: n.x + 14, onTap: [
+      { closeup: 'vrana' },
+      { ask: { q: 'Chceš pusu?', opts: [{ text: 'Ne', ok: true }, { text: 'Ano', ok: false, reply: 'Tak se trochu přibliž. Ale vřána je pořád vřána.' }] } },
+      { ask: { q: 'Protože nejsem Byrtak, že?', opts: [{ text: 'Ne, nejsi. Táhni.', ok: true }, { text: 'Jsi.', ok: false, reply: 'Tak to se nedomluvíme.' }] } },
+      { closeup: 'off' },
+      { say: ['Vřána zmizí v davu.'] }
+    ] };
+    return { id: 'npc' + i, x: n.x - 6, y: n.y, w: 20, h: 36, show: () => true, stand: n.x + 14, onTap: [{ say: ['Tohle není on.'] }] };
+  });
+  list.push({ id: 'ondra', x: s => s.pos.ond - 14, y: 96, w: 28, h: 56, show: s => !s.flags.kopDone, stand: s => s.pos.ond + 24, onTap: [
+    { closeup: 'ondra' },
+    { say: ['Ondra se k tobě nakloní a dá ti pusu.', 'Půjdu spát. Ty buď hodná.', 'Sabriela zůstane hodná a nechá ho jít.'] },
+    { closeup: 'off' },
+    { flag: 'kopDone' },
+    { heart: true }
+  ] });
+  return list;
+}
+function koprivQuest(){ if (state.flags.kopDone) return 'Hotovo'; return (state.flags.seenA && state.flags.seenB) ? 'Úkol: Ondra je blízko' : 'Úkol: najdi Ondru v davu · dva lidé nejsou on'; }
+function toggleStrobe(){
+  state.flags.strobo = !state.flags.strobo;
+  $('strobe').classList.toggle('on', !!state.flags.strobo);
+  renderObjs(); refreshInv();
+}
+function showCloseup(kind){
+  const el = $('closeup');
+  if (kind === 'off'){ el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  if (kind === 'vrana') el.innerHTML = `<svg width='200' height='200' viewBox='0 0 20 15' shape-rendering='crispEdges'>${spriteMarkup(BIRD_ROWS, PAL_BIRD, false, 1)}</svg>`;
+  else el.innerHTML = `<svg width='160' height='250' viewBox='0 0 16 25' shape-rendering='crispEdges'>${spriteMarkup(ONDRA_FRONT_COMP, PAL_ONDRA, false, 1)}</svg>`;
+}
+function makeCrowd(){
+  const spots = [
+    { x: 40, y: 150, k: 'f' }, { x: 96, y: 160, k: 'm' }, { x: 150, y: 146, k: 'f' }, { x: 262, y: 152, k: 'm' },
+    { x: 306, y: 162, k: 'f' }, { x: 352, y: 146, k: 'm' }, { x: 378, y: 164, k: 'f' },
+    { x: 118, y: 132, k: 'fake', tag: 'A' }, { x: 318, y: 130, k: 'fake', tag: 'B' }
+  ];
+  return spots.map(s => {
+    if (s.k === 'fake') return { x: s.x, y: s.y, fake: true, tag: s.tag, rows: ONDRA_FRONT_COMP, pal: Object.assign({}, PAL_ONDRA, { T: s.tag === 'A' ? '#2a6fa8' : '#8a2b2b' }) };
+    const d = s.k === 'f' ? decoyFemale() : decoyMale();
+    return { x: s.x, y: s.y, fake: false, rows: d.rows, pal: d.pal };
+  });
+}
+function koprivHotspots3(){
+  const hs = state.crowd.map((c, i) => {
+    if (c.fake) return { id: 'fake' + c.tag, x: c.x - 16, y: c.y - 50, w: 32, h: 50, show: s => !s.flags['seen' + c.tag], onTap: [{ flag: 'seen' + c.tag }, { say: ['Tohle není on.'] }] };
+    return { id: 'crowd' + i, x: c.x - 16, y: c.y - 50, w: 32, h: 50, show: () => true, onTap: [{ say: ['Nějaký cizí člověk se na tebe jen podívá.'] }] };
+  });
+  hs.unshift({ id: 'ondra', x: s => s.pos.ond - 16, y: 110, w: 32, h: 50, show: s => s.flags.seenA && s.flags.seenB && !s.flags.kopDone, stand: s => s.pos.ond + 26, onTap: [
+    { closeup: 'vrana' },
+    { ask: { q: 'Chceš pusu?', opts: [{ text: 'Ne', ok: true }, { text: 'Ano', ok: false, reply: 'Tak se trochu přibliž. Ale vřána je pořád vřána.' }] } },
+    { ask: { q: 'Protože nejsem Byrtak, že?', opts: [{ text: 'Ne, nejsi. Táhni.', ok: true }, { text: 'Jsi.', ok: false, reply: 'Tak to se nedomluvíme.' }] } },
+    { closeup: 'off' },
+    { say: ['Vána zmizí v davu. Ten večer ti zkusila štěstí jiná osoba, ale ty jsi jasná.'] },
+    { closeup: 'ondra' },
+    { say: ['Ondra se k tobě nakloní a dá ti pusu.', 'Půjdu spát. Ty buď hodná.', 'Sabriela zůstane hodná a nechá ho jít.'] },
+    { closeup: 'off' },
+    { flag: 'kopDone' },
+    { heart: true }
+  ] });
+  return hs;
+}
+function devStartFromHash(){
+  $('dev').addEventListener('click', e => e.stopPropagation());
+  $('dev').addEventListener('change', e => devJump2(e.target.value));
+  const v = location.hash.slice(1);
+  const sets = {
+    kap2: ['kap1Done'],
+    map: ['kap1Done', 'kap2Done'],
+    chata: ['kap1Done', 'kap2Done', 'kap3Done'],
+    interier: ['kap1Done', 'kap2Done', 'kap3Done', 'chataDone', 'zapalkyTaken', 'triskyTaken', 'dvirkaOpen', 'svitiNaOndru', 'stoveLit', 'interierDone'],
+    kopriv: ['kap1Done', 'kap2Done', 'kap3Done', 'chataDone', 'interierDone', 'bedDone']
+  };
+  if (!sets[v]) return;
+  $('dev').value = v;
+  sets[v].forEach(f => state.flags[f] = true);
+  if (v === 'interier' || v === 'kopriv') state.inv.push('svetlo', 'wood');
+  $('title').hidden = true;
+  exec({ scene: v === 'tromso' ? 'map' : v }, () => {});
+}
+const DEV_SETS = {
+  kap2: ['kap1Done'],
+  map: ['kap1Done', 'kap2Done'],
+  chata: ['kap1Done', 'kap2Done', 'kap3Done'],
+  interier: ['kap1Done', 'kap2Done', 'kap3Done', 'chataDone', 'zapalkyTaken', 'triskyTaken', 'dvirkaOpen', 'svitiNaOndru', 'stoveLit', 'interierDone'],
+  kopriv: ['kap1Done', 'kap2Done', 'kap3Done', 'chataDone', 'interierDone', 'bedDone'],
+  tromso: ['kap1Done', 'kap2Done', 'kap3Done', 'chataDone', 'interierDone', 'bedDone', 'kopDone', 'bazenDone', 'marry2Done', 'bathDone', 'fuetCut', 'loftDone']
+};
+function devJump(v){
+  $('dlg').hidden = true; state.busy = false; state.lines = null; state.lineCb = null;
+  state.target = null; state.onArrive = null;
+  $('dlgChoices').innerHTML = ''; $('closeup').hidden = true; $('closeup').innerHTML = '';
+  $('strobe').classList.remove('on');
+  state.inv = []; state.flags = {}; state.active = 'sab'; state.pose = ''; state.crowd = null;
+  state.pos = { sab: 60, ond: 210 };
+  $('inv').innerHTML = '';
+  $('dev').value = v;
+  if (v === 'kap1'){
+    state.sceneId = 'kap1'; state.x = SCENES.kap1.start;
+    sabG.style.display = ''; ondG.style.display = 'none';
+    renderBg(); renderObjs(); setPose('front'); placeChar(); refreshInv(); refreshQuest();
+    $('title').hidden = false;
+    return;
+  }
+  (DEV_SETS[v] || []).forEach(f => state.flags[f] = true);
+  if (v === 'interier' || v === 'kopriv') state.inv.push('svetlo', 'wood');
+  $('title').hidden = true;
+  exec({ scene: v === 'tromso' ? 'map' : v }, () => {});
+}
+const RAVEN_FULL = RAVEN_ROWS.concat(ONDRA_BODY_FRONT.map(r => '..' + r + '..'));
+const PAL_RAVEN_FULL = {K:'#1d1d1d',W:'#ffffff',Y:'#f1c40f',S:'#1d1d1d',A:'#1d1d1d',T:'#2a2a33',J:'#1a1a22',D:'#111111'};
+function makeCrowd2(){
+  const spots = [
+    { x: 14, y: 150, k: 'f' }, { x: 48, y: 162, k: 'm' }, { x: 78, y: 140, k: 'f' }, { x: 104, y: 166, k: 'm' },
+    { x: 140, y: 138, k: 'f' }, { x: 166, y: 160, k: 'm' }, { x: 226, y: 140, k: 'f' }, { x: 248, y: 164, k: 'm' },
+    { x: 270, y: 136, k: 'f' }, { x: 372, y: 150, k: 'm' }, { x: 390, y: 170, k: 'f' },
+    { x: 118, y: 126, k: 'ond', tag: 'A' }, { x: 200, y: 122, k: 'ond', tag: 'B' }, { x: 330, y: 124, k: 'ond', tag: 'R' }
+  ];
+  return spots.map(s => {
+    if (s.k === 'ond') return { x: s.x, y: s.y, fake: true, tag: s.tag, rows: ONDRA_FRONT_COMP, pal: PAL_ONDRA };
+    const d = s.k === 'f' ? decoyFemale() : decoyMale();
+    return { x: s.x, y: s.y, fake: false, rows: d.rows, pal: d.pal };
+  });
+}
+function koprivMarkup2(s){
+  let o = R(0,0,400,180,'#120d1a') + R(0,0,400,60,'#1e1830');
+  o += R(120,8,110,14,'#ff4f9a') + '<text x="175" y="18" font-size="9" font-weight="700" fill="#fff8e7">APRÈS SKI</text>';
+  const cols = ['#2e7d4f','#8e3b2d','#d9a441','#2e4f7d','#7a2e7a'];
+  for (let i = 0, x = 0; x < 400; i++, x += 12) o += R(x, 34, 7, 20, cols[i % 5]);
+  o += R(0,26,400,4,'#2a1c14') + R(0,56,400,4,'#7a5a3a') + R(0,60,400,14,'#3a2a1e');
+  for (let x = 0; x < 400; x += 40) o += R(x, 6, 3, 3, cols[(x / 40) % 5 | 0]);
+  o += R(30,96,50,4,'#e8e8e8') + R(52,100,4,16,'#555') + R(36,90,4,6,'#f2c94c');
+  o += R(300,104,50,4,'#e8e8e8') + R(322,108,4,16,'#555') + R(312,98,4,6,'#f2c94c');
+  o += R(0,152,400,28,'#1a1520');
+  (s.crowd || []).forEach(c => o += `<g transform='translate(${c.x - 16},${c.y - 50})'>${spriteMarkup(c.rows, c.pal, false, 2)}</g>`);
+  if (s.flags.svitilnaZapnuta) o += torchMaskSVG(s.pos.sab, 112); else o += R(0,0,400,180,'#000',' opacity="0.86"');
+  return o;
+}
+function koprivHotspots4(){
+  const hs = [];
+  state.crowd.forEach((c, i) => {
+    if (c.fake && c.tag === 'R') return;
+    if (c.fake) hs.push({ id: 'fake' + c.tag, x: c.x - 16, y: c.y - 50, w: 32, h: 50, show: s => !s.flags['seen' + c.tag], onTap: [{ flag: 'seen' + c.tag }, { say: ['Tohle není on.'] }] });
+    else hs.push({ id: 'crowd' + i, x: c.x - 16, y: c.y - 50, w: 32, h: 50, show: () => true, onTap: [{ say: ['Někdo se na tebe jen podívá a vrátí se k pití.'] }] });
+  });
+  const real = state.crowd.find(c => c.tag === 'R');
+  hs.unshift({ id: 'ondra', x: real.x - 16, y: real.y - 50, w: 32, h: 50, show: s => s.flags.seenA && s.flags.seenB && !s.flags.kopDone, stand: 298, onTap: [
+    { closeup: 'vrana' },
+    { ask: { q: 'Chceš pusu?', opts: [{ text: 'Ne', ok: true }, { text: 'Ano', ok: false, reply: 'Tak se trochu přibliž. Ale vřána je pořád vřána.' }] } },
+    { ask: { q: 'Protože nejsem Byrtak, že?', opts: [{ text: 'Ne, nejsi. Táhni.', ok: true }, { text: 'Jsi.', ok: false, reply: 'Tak to se nedomluvíme.' }] } },
+    { closeup: 'off' },
+    { say: ['Vána zmizí v davu.'] },
+    { closeup: 'ondra' },
+    { say: ['Ondra se k tobě naklouní a dá ti pusu.', '„Pjůdu spát. Slibíš mi, že budeš hodná?“', '„Slibuju.“'] },
+    { closeup: 'off' },
+    { flag: 'kopDone' },
+    { hud: true },
+    { heart: true }
+  ] });
+  return hs;
+}
+function showHud(){
+  const h = document.createElement('div');
+  h.id = 'hud';
+  h.style.cssText = 'position:absolute;top:52px;right:10px;display:flex;align-items:center;gap:8px;background:rgba(20,12,8,.7);border-radius:10px;padding:6px 10px;z-index:5;pointer-events:none';
+  h.innerHTML = `<svg width='36' height='36' viewBox='0 0 12 12' shape-rendering='crispEdges'>${spriteMarkup(ONDRA_HEAD_FRONT, PAL_ONDRA, false, 1)}</svg><span style='color:#ff5c8a;font-size:18px;letter-spacing:2px'>♥♥♥</span>`;
+  $('wrap').appendChild(h);
+}
+function koprivMarkup3(s){
+  let o = koprivMarkup2(s);
+  if (s.target !== null){
+    (s.crowd || []).forEach(c => {
+      if (c.fake || Math.abs(c.x - s.x) > 130) return;
+      const ex = c.x - 9, ey = c.y - 58;
+      o += R(ex,ey,5,4,'#ffffff') + R(ex+6,ey,5,4,'#ffffff') + R(ex+2,ey+1,2,2,'#1d1d1d') + R(ex+8,ey+1,2,2,'#1d1d1d');
+    });
+  }
+  return o;
+}
+function startDrinks(){
+  if (state.drinkTimer) return;
+  state.drinkTimer = setInterval(() => {
+    if (state.sceneId !== 'kopriv' || state.busy || state.target === null) return;
+    
+  }, 3500);
+}
+function drinkEvent(){
+  state.drunkUntil = Date.now() + 9000;
+  $('scene').style.filter = 'blur(0.8px)';
+  setTimeout(() => { $('scene').style.filter = ''; }, 9000);
+  say(['Někdo ti přistál drink. Vypiješ ho a svět se trochu zatočí.']);
+}
+function koprivHotspots5(){
+  const hs = [];
+  state.crowd.forEach((c, i) => {
+    if (c.fake && c.tag === 'R') return;
+    if (c.fake) hs.push({ id: 'fake' + c.tag, x: c.x - 16, y: c.y - 50, w: 32, h: 50, show: s => !s.flags['seen' + c.tag], onTap: [{ flag: 'seen' + c.tag }, { say: ['Tohle není on.'] }] });
+    else hs.push({ id: 'crowd' + i, x: c.x - 16, y: c.y - 50, w: 32, h: 50, show: () => true, onTap: [{ say: ['Někdo se na tebe jen podívá a vrátí se k pití.'] }] });
+  });
+  const real = state.crowd.find(c => c.tag === 'R');
+  hs.unshift({ id: 'ondra', x: real.x - 16, y: real.y - 50, w: 32, h: 50, show: s => s.flags.seenA && s.flags.seenB && !s.flags.kopDone, stand: 298, onTap: [
+    { closeup: 'vrana' },
+    { ask: { q: 'Chceš pusu?', opts: [{ text: 'Ne', ok: true }, { text: 'Ano', ok: false, reply: 'Tak se trochu přibliž. Ale vřána je pořád vřána.' }] } },
+    { ask: { q: 'Protože nejsem Byrtak, že?', opts: [{ text: 'Ne, nejsi. Táhni.', ok: true }, { text: 'Jsi.', ok: false, reply: 'Tak se nedomluvíme.' }] } },
+    { closeup: 'off' },
+    { say: ['Vána zmizí v davu.'] },
+    { closeup: 'ondra' },
+    { say: ['Ondra se k tobě naklání a dá ti pusu.'] },
+    { ask: { q: 'Půjdu spát. Slibíš mi, že budeš hodná?', opts: [
+      { text: 'Radostně: Slibuju.', ok: true },
+      { text: 'Zamyšleně: Uvidím.', ok: false, reply: 'Ondra se usměje. „Dobře, ale já tě znam.“' },
+      { text: 'Naštvaně: Nech toho.', ok: false, reply: 'Ondra zvážní. „Dobře. Tak zítra.“' }
+    ] } },
+    { ask: { q: '„Dobrou noc, Sabrielo.“', opts: [
+      { text: 'Dobrou noc.', ok: true },
+      { text: 'Ještě počkej.', ok: false, reply: 'Ondra se zasmáje, ale zůstane stát a čeká.' }
+    ] } },
+    { closeup: 'off' },
+    { flag: 'kopDone' },
+    { hud: true },
+    { heart: true }
+  ] });
+  return hs;
+}
+const BIRD_ROWS = ['.......KKKKK........','......KKKKKKK.......','.....KKKKKKKKK......','.....KKKWEKKKK......','....KKKKKKKKKYYY....','....KKKKKKKKKKYYY...','.....KKKKKKKKKKY....','..KKKKKKKKKKKKK.....','.KKKKKKKKKKKKKKK....','KKKKKKKKKKKKKKKKKK..','.KKKKKKKKKKKKKKK....','..KKKKKKKKKKKKK.....','...KKKKKKKKKKK......','....KK.KKK.KK.......','....YY....YY........'];
+const PAL_BIRD = {K:'#1d1d1d',W:'#ffffff',E:'#333333',Y:'#f1c40f'};
+function koprivMarkup4(s){
+  let o = koprivMarkup2(s);
+  if (s.target !== null){
+    (s.crowd || []).forEach(c => {
+      if (c.fake || Math.abs(c.x - s.x) > 170) return;
+      const dx = s.x > c.x ? 3 : 1;
+      const ey = c.y - 62;
+      o += R(c.x - 10, ey, 6, 6, '#ffffff') + R(c.x - 10 + dx, ey + 2, 3, 3, '#1d1d1d');
+      o += R(c.x + 4, ey, 6, 6, '#ffffff') + R(c.x + 4 + dx, ey + 2, 3, 3, '#1d1d1d');
+    });
+  }
+  if (s.flags.drinkOffer) o += R(s.x - 6, 82, 12, 2, '#ffffff') + R(s.x - 5, 84, 10, 12, '#ff8c2a') + R(s.x - 4, 96, 8, 4, '#ffb347');
+  return o;
+}
+function drinkEvent2(){
+  if (state.flags.drinkOffer) return;
+  state.flags.drinkOffer = true;
+  SCENES.kopriv.hotspots.unshift({ id: 'drink', x: s => s.x - 12, y: 80, w: 24, h: 24, show: s => !!s.flags.drinkOffer, onTap: [{ drink: true }] });
+  renderObjs();
+  say(['Někdo ti přistál drink nad hlavu. Vypij ho.']);
+}
+function applyDrunk(){
+  state.drunkUntil = Date.now() + 10000;
+  $('scene').style.filter = 'blur(1px)';
+  const old = $('ghost'); if (old) old.remove();
+  const g = document.createElement('div');
+  g.id = 'ghost';
+  g.style.cssText = 'position:absolute;inset:0;pointer-events:none;opacity:.45;transform:translateX(7px);z-index:0';
+  g.innerHTML = $('scene').outerHTML.replace('id="scene"', 'id="ghostsvg"');
+  $('scene').insertAdjacentElement('afterend', g);
+  setTimeout(() => { $('scene').style.filter = ''; g.remove(); }, 10000);
+}
+function drinkDone(next){
+  state.flags.drinkOffer = false;
+  SCENES.kopriv.hotspots = SCENES.kopriv.hotspots.filter(h => h.id !== 'drink');
+  renderObjs();
+  applyDrunk();
+  return say(['Vypiješ to na ex. Všechno se najednou zdvojená a rozmazá.'], next);
+}
+function koprivMarkup5(s){
+  let o = koprivMarkup2(s);
+  if (s.target !== null){
+    (s.crowd || []).forEach(c => {
+      if (Math.abs(c.x - s.x) > 170) return;
+      const dx = s.x > c.x ? 2 : 0;
+      const ey = c.y - 40;
+      o += R(c.x - 8, ey, 4, 4, '#ffffff') + R(c.x - 8 + dx, ey + 1, 2, 2, '#1d1d1d');
+      o += R(c.x + 2, ey, 4, 4, '#ffffff') + R(c.x + 2 + dx, ey + 1, 2, 2, '#1d1d1d');
+    });
+  }
+  if (s.flags.drinkOffer) o += R(s.x - 6, 82, 12, 2, '#ffffff') + R(s.x - 5, 84, 10, 12, '#ff8c2a') + R(s.x - 4, 96, 8, 4, '#ffb347');
+  return o;
+}
+function applyDrunk2(level){
+  state.drunkUntil = Date.now() + (level === 2 ? 10000 : 4000);
+  state.drunkLevel = level;
+  $('scene').style.filter = level === 2 ? 'blur(1px)' : 'blur(0.4px)';
+  const old = $('ghost'); if (old) old.remove();
+  const g = document.createElement('div');
+  g.id = 'ghost';
+  g.style.cssText = 'position:absolute;inset:0;pointer-events:none;opacity:' + (level === 2 ? '.45' : '.2') + ';transform:translateX(' + (level === 2 ? 7 : 3) + 'px);z-index:0';
+  g.innerHTML = $('scene').outerHTML.replace('id="scene"', 'id="ghostsvg"');
+  $('scene').insertAdjacentElement('afterend', g);
+  clearTimeout(state.drunkT);
+  state.drunkT = setTimeout(() => {
+    $('scene').style.filter = ''; g.remove();
+    state.sway = 0; state.drunkLevel = 0; placeChar();
+  }, level === 2 ? 10000 : 4000);
+}
+function miniDrink(next){
+  state.flags.drinkOffer = false;
+  SCENES.kopriv.hotspots = SCENES.kopriv.hotspots.filter(h => h.id !== 'drink');
+  renderObjs();
+  state.busy = true;
+  const bar = document.createElement('div');
+  bar.id = 'mini';
+  bar.style.cssText = 'position:absolute;left:50%;bottom:72px;transform:translateX(-50%);width:60%;max-width:360px;height:52px;background:rgba(20,12,8,.88);border-radius:10px;padding:8px;box-sizing:border-box;z-index:7;cursor:pointer';
+  bar.innerHTML = '<div style="position:relative;height:28px;background:#3a2a1e;border-radius:6px;overflow:hidden"><div style="position:absolute;left:40%;width:20%;top:0;bottom:0;background:#3fbf5f"></div><div id="miniMark" style="position:absolute;top:0;bottom:0;width:6px;background:#ffd27a;left:0"></div></div><div style="color:#f7ead2;font:12px system-ui,sans-serif;margin-top:4px;text-align:center">Klepni, ať je ukazatel v zeleném poli</div>';
+  $('wrap').appendChild(bar);
+  let p = 0, dir = 1;
+  const iv = setInterval(() => {
+    p += dir * 0.025;
+    if (p >= 1){ p = 1; dir = -1; }
+    if (p <= 0){ p = 0; dir = 1; }
+    const m = document.getElementById('miniMark'); if (m) m.style.left = (p * 100) + '%';
+  }, 16);
+  bar.addEventListener('click', e => {
+    e.stopPropagation();
+    clearInterval(iv);
+    const good = p >= 0.4 && p <= 0.6;
+    bar.remove();
+    state.flags.drinkedOnce = true; applyDrunk2(good ? 1 : 2);
+    say(good
+      ? ['Vypiješ to na ex, bez mrknutí. Jen se ti trochu točí hlava.']
+      : ['Trefila jsi to vedle a polovina ti steče po bradě. Svět se zdvojí a ty klopýtáš.'], next);
+  });
+}
+function badClick(){
+  state.badClicks = (state.badClicks || 0) + 1;
+  if (state.badClicks % 2 === 0 && !state.flags.drinkOffer) drinkEvent2();
+}
+function koprivHotspots6(){
+  const hs = [];
+  state.crowd.forEach((c, i) => {
+    if (c.fake && c.tag === 'R') return;
+    if (c.fake) hs.push({ id: 'fake' + c.tag, x: c.x - 16, y: c.y - 50, w: 32, h: 50, show: s => !s.flags['seen' + c.tag], onTap: [{ flag: 'seen' + c.tag }, { say: ['Tohle není on.'] }, { bad: true }, { drinkTest: true }] });
+    else hs.push({ id: 'crowd' + i, x: c.x - 16, y: c.y - 50, w: 32, h: 50, show: () => true, onTap: [{ say: ['Někdo se na tebe jen podívá a vrátí se k pití.'] }] });
+  });
+  const real = state.crowd.find(c => c.tag === 'R');
+  hs.unshift({ id: 'ondra', x: real.x - 16, y: real.y - 50, w: 32, h: 50, show: s => s.flags.seenA && s.flags.seenB && s.flags.drinkedOnce && !s.flags.kopDone, stand: 298, onTap: [
+    { closeup: 'vrana' },
+    { ask: { q: 'Chceš pusu?', opts: [{ text: 'Ne', ok: true }, { text: 'Ano', ok: false, reply: 'Tak se trochu přibliž. Ale vřána je pořád vřána.' }] } },
+    { ask: { q: 'Protože nejsem Byrtak, že?', opts: [{ text: 'Ne, nejsi. Táhni.', ok: true }, { text: 'Jsi.', ok: false, reply: 'Tak se nedomluvíme.' }] } },
+    { closeup: 'off' },
+    { say: ['Vána zmizí v davu.'] },
+    { closeup: 'ondra' },
+    { say: ['Ondra se k tobě naklání a dá ti pusu.'] },
+    { ask: { q: 'Půjdu spát. Slibíš mi, že budeš hodná?', opts: [
+      { text: 'Radostně: Slibuju.', ok: true },
+      { text: 'Zamyšleně: Uvidím.', ok: false, reply: 'Ondra se usměje. „Dobře, ale já tě znam.“' },
+      { text: 'Naštvaně: Nech toho.', ok: false, reply: 'Ondra zvážní. „Dobře. Tak zítra.“' }
+    ] } },
+    { ask: { q: '„Dobrou noc, Sabrielo.“', opts: [
+      { text: 'Dobrou noc.', ok: true },
+      { text: 'Ještě počkej.', ok: false, reply: 'Ondra se zasmáje, ale zůstane stát a čeká.' }
+    ] } },
+    { closeup: 'off' },
+    { flag: 'kopDone' },
+    { hud: true },
+    { heart: true },
+    { fade: true },
+    { scene: 'bazen' }
+  ] });
+  return hs;
+}
+SCENES.bazen = { hotspots: [] };
+const BAZEN_INTRO = ['Obrovský vyhřívaný bazén s krytem. Je tma a světlo jde jen zespodu.', 'Ondra tu není. Jen jeho srdíčka vpravo nahoře ukazují, kolik jich zbývá. Klepni kamkoliv a muž se přiblíží.'];
+function bazenMarkup(s){
+  let o = R(0,0,400,180,'#05080f') + R(0,0,400,18,'#2a2a33');
+  for (let x = 0; x < 400; x += 40) o += R(x, 18, 2, 8, '#1d1d26');
+  o += R(0,70,400,80,'#0f4a5e') + R(30,64,340,4,'#7fd3e0');
+  for (let x = 40; x < 370; x += 36) o += R(x, 80 + ((x * 7) % 30), 10, 2, '#2a7a90');
+  o += R(0,140,400,40,'#1a3f4f',' opacity="0.6"');
+  o += R(20,150,360,30,'#3a3a44');
+  o += R(110,150,24,6,'#e8d8c0');
+  for (let x = 0; x < 400; x += 50) o += R(x, 160, 30, 20, '#4fd1e8', ' opacity="0.25"');
+  return o;
+}
+function bazenHotspots(){
+  return [
+    { id: 'ondra', x: s => s.pos.ond - 16, y: 110, w: 32, h: 50, show: s => !s.flags.ev1, stand: 270, onTap: [
+      { say: ['[Placeholder] Sabriela odejde k baru a Ondra chvíli zůstane sám.', 'Ondrovi ubývá jedno srdíčko.'] },
+      { loseHeart: true }, { flag: 'ev1' }
+    ] },
+    { id: 'towel', x: 106, y: 140, w: 32, h: 18, show: s => !s.flags.ev2, stand: 122, onTap: [
+      { say: ['[Placeholder] Na okraji leží ručník. Sabriela na něj šlápne a Ondra se polekaně ohlédne.', 'Ondrovi ubývá jedno srdíčko.'] },
+      { loseHeart: true }, { flag: 'ev2' }
+    ] }
+  ];
+}
+function drawHud(){
+  let el = $('lifehud');
+  if (state.sceneId !== 'bazen'){ if (el) el.remove(); return; }
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'lifehud';
+    el.style.cssText = 'position:absolute;top:52px;right:10px;display:flex;align-items:center;gap:8px;background:rgba(20,12,8,.7);border-radius:10px;padding:6px 10px;z-index:5;pointer-events:none';
+    $('wrap').appendChild(el);
+  }
+  const n = state.hearts == null ? 3 : state.hearts;
+  el.innerHTML = `<svg width='36' height='36' viewBox='0 0 12 12' shape-rendering='crispEdges'>${spriteMarkup(ONDRA_HEAD_FRONT, PAL_ONDRA, false, 1)}</svg><span style='color:#ff5c8a;font-size:18px;letter-spacing:2px'>${'♥'.repeat(n)}${'♡'.repeat(3 - n)}</span>`;
+}
+function bazenQuest(){ return (state.flags.ev1 && state.flags.ev2) ? 'Hotovo' : 'Úkol: prožij večer u bazénu'; }
+const PAL_M1 = Object.assign({}, PAL_ONDRA, { G: '#3a2016', E: '#3a2016', S: '#f0c09a', A: '#f0c09a' });
+const PAL_KORPI = Object.assign({}, PAL_ONDRA, { G: '#c9a46a', E: '#c9a46a', S: '#e0b08a', A: '#e0b08a' });
+function womanPal(h, sk){ return Object.assign({}, PAL_SAB, { H: h, S: sk, A: sk }); }
+function bazenDecor(){
+  return [
+    { x: 40, y: 120, rows: SAB_HEAD_FRONT, pal: womanPal('#8a5a2b', '#f2c7a5') },
+    { x: 190, y: 116, rows: SAB_HEAD_FRONT, pal: womanPal('#1d1d1d', '#e0b08a') },
+    { x: 300, y: 124, rows: SAB_HEAD_FRONT, pal: womanPal('#c9552f', '#f2c7a5') },
+    { x: 236, y: 126, rows: ONDRA_HEAD_FRONT, pal: Object.assign({}, PAL_ONDRA, { G: '#1d1d1d', E: '#1d1d1d', S: '#e0b08a', A: '#e0b08a' }) }
+  ];
+}
+function headAt(x, y, rows, pal){ return `<g transform='translate(${x - 12},${y})'>${spriteMarkup(rows, pal, false, 2)}</g>`; }
+function bazenMarkup2(s){
+  let o = R(0,0,400,180,'#05080f') + R(0,0,400,18,'#2a2a33');
+  for (let x = 0; x < 400; x += 40) o += R(x, 18, 2, 8, '#1d1d26');
+  o += R(0,70,400,80,'#0f4a5e') + R(30,64,340,4,'#7fd3e0');
+  for (let x = 40; x < 370; x += 36) o += R(x, 80 + ((x * 7) % 30), 10, 2, '#2a7a90');
+  o += R(0,140,400,40,'#1a3f4f',' opacity="0.6"');
+  for (let x = 0; x < 400; x += 50) o += R(x, 160, 30, 20, '#4fd1e8', ' opacity="0.25"');
+  bazenDecor().forEach(d => o += headAt(d.x, d.y, d.rows, d.pal));
+  const bz = s.bazen || {};
+  if (bz.phase !== 3) o += headAt(bz.sx || 120, 104, SAB_HEAD_FRONT, PAL_SAB);
+  const b = s.bazen || {};
+  if (b.phase === 1) o += headAt(b.mx, 100, ONDRA_HEAD_FRONT, PAL_M1);
+  if (b.phase === 2) o += headAt(b.kx, 100, ONDRA_HEAD_FRONT, PAL_KORPI);
+  return o;
+}
+function bazenTap(){
+  const b = state.bazen;
+  if (!b || b.phase === 3) return;
+  if (b.phase === 1) b.mx = Math.max(120, b.mx - 70);
+  else b.kx = Math.max(120, b.kx - 70);
+  b.taps = (b.taps || 0) + 1;
+  renderObjs();
+  if (b.taps >= 3){ b.taps = 0; run(b.phase === 1 ? BAZEN_EV1 : BAZEN_EV2); }
+}
+function showCloseupHead(rows, pal){
+  const el = $('closeup');
+  el.hidden = false;
+  el.innerHTML = `<svg width='220' height='220' viewBox='0 0 12 12' shape-rendering='crispEdges'>${spriteMarkup(rows, pal, false, 1)}</svg>`;
+}
+function fadeHeartOut(){
+  const d = document.createElement('div');
+  d.textContent = '♥';
+  d.style.cssText = 'position:absolute;top:38%;left:0;right:0;text-align:center;color:#ff5c8a;font-size:64px;pointer-events:none;z-index:8;animation:fallHeart 1.2s ease-in forwards';
+  $('wrap').appendChild(d);
+  setTimeout(() => d.remove(), 1400);
+}
+const BAZEN_EV1 = [
+  { closeupHead: { rows: ONDRA_HEAD_FRONT, pal: PAL_M1 } },
+  { ask: { q: 'Dáš mi pusu?', opts: [
+    { text: 'Klidně: Ne, díky.', ok: true },
+    { text: 'Naštvaně: Běž pryč!', ok: true },
+    { text: 'Váhavě: Asi ne...', ok: false, reply: 'Muž se usměje. „Tak to vidíš, že jo.“' }
+  ] } },
+  { closeup: 'off' },
+  { loseHeart: true },
+  { say: ['Muž odpluje pryč. Sabriela drží slib a zůstává hodná.'] },
+  { bazenPhase: 2 }
+];
+const BAZEN_EV2 = [
+  { closeupHead: { rows: ONDRA_HEAD_FRONT, pal: PAL_KORPI } },
+  { say: ['Korpi se k tobě přitiskne a sáhne tam, kam nemá.'] },
+  { ask: { q: 'Co uděláš?', opts: [
+    { text: 'Odstrčit: Sundej ruce!', ok: true },
+    { text: 'Zamrznout: ...', ok: false, reply: 'Zůstaneš stát a on to bere jako souhlas. Odstrč ho, prosím.' }
+  ] } },
+  { closeup: 'off' },
+  { loseHeart: true },
+  { bazenPhase: 3 },
+  { say: ['Sabriela se zvedne z vody. Slíbila, že se bude chovat hezky, a tak to dodržela. Jde spát.'] },
+  { flag: 'bazenDone' },
+  { fade: true },
+  { scene: 'map' }
+];
+function bazenQuest2(){ return state.bazen && state.bazen.phase === 3 ? 'Hotovo' : 'Úkol: drž slib, který jsi dala'; }
+function bazenTap2(tx){
+  const b = state.bazen;
+  if (!b || b.phase === 3) return;
+  const dir = Math.sign(tx - b.sx);
+  b.sx = Math.max(24, Math.min(376, b.sx + dir * 40));
+  const mk = b.phase === 1 ? 'mx' : 'kx';
+  const d = b.sx - b[mk];
+  b[mk] += Math.sign(d) * Math.min(70, Math.abs(d));
+  renderObjs();
+  if (Math.abs(b.sx - b[mk]) <= 40) run(b.phase === 1 ? BAZEN_EV1B : BAZEN_EV2B);
+}
+const BAZEN_EV1B = [
+  { say: ['Muž se k tobě nakloní a chce pusu. Ty ji nechceš.'] },
+  { closeupHead: { rows: ONDRA_HEAD_FRONT, pal: PAL_M1 } },
+  { ask: { q: 'Co udděláš?', opts: [
+    { text: 'Klidně: Ne, nechci.', ok: true },
+    { text: 'Naštvaně: Odstrč ho!', ok: true },
+    { text: 'Zavažavě: Hm, uvidíme...', ok: false, reply: 'Tohle nechceš. Nemusíš to řešit a můžeš říct ne.' }
+  ] } },
+  { closeup: 'off' },
+  { loseHeart: true },
+  { say: ['Muž odpluje pryč. Sabriela drží slib a zůstává hodná.'] },
+  { say: ['Nic se nestalo, ale Ondru to přesto zranilo. Prožil s tebou nádherný večer a myslel si, že se nic takového nestane.'] },
+  { bazenPhase: 2 }
+];
+const BAZEN_EV2B = [
+  { say: ['Korpi se k tobě přitiskne a sáhne tam, kam nemá.', 'Ondra to nevidí, ale i tak ho to zraní. Myslí si, že mezi vámi se nic takového nemůže stát.'] },
+  { closeupHead: { rows: ONDRA_HEAD_FRONT, pal: PAL_KORPI } },
+  { ask: { q: 'Co udděláš?', opts: [
+    { text: 'Odstrčit: Sundej ruce!', ok: true },
+    { text: 'Zamrznout: ...', ok: false, reply: 'Zůstaneš stát a on to bere jako souhlas. Odstrč ho, prosím.' }
+  ] } },
+  { closeup: 'off' },
+  { loseHeart: true },
+  { bazenPhase: 3 },
+  { say: ['Sabriela se zvedne z vody. Slíbila, že se bude chovat hezky, a tak to dodržela. Jde spát.'] },
+  { flag: 'bazenDone' },
+  { fade: true },
+  { scene: 'map' }
+];
+function marry2Markup(s){
+  let o = R(0,0,400,180,'#2a1a10') + R(0,0,400,110,'#3a2418');
+  for (let x = 0; x < 400; x += 40) o += R(x, 0, 2, 110, '#2e1c12');
+  o += R(90,118,220,6,'#7a5230') + R(100,124,6,40,'#4a3020') + R(284,124,6,40,'#4a3020');
+  o += R(96,80,48,40,'#9fd3e6') + R(256,80,48,40,'#f7f7f5');
+  o += R(196,104,8,14,'#f5ecd0') + "<g style='animation:pulse 1.2s ease-in-out infinite'>" + R(197,96,6,8,'#ffb347') + '</g>';
+  o += headAt(120, 50, SAB_HEAD_FRONT, PAL_SAB) + headAt(280, 50, ONDRA_HEAD_FRONT, PAL_ONDRA);
+  if (s.flags.cry) o += R(112,70,2,6,'#8fd3ff') + R(124,70,2,6,'#8fd3ff') + R(272,70,2,6,'#8fd3ff') + R(284,70,2,6,'#8fd3ff');
+  return o;
+}
+function fadeTo(cb){
+  const d = document.createElement('div');
+  d.style.cssText = 'position:absolute;inset:0;background:#000;opacity:0;transition:opacity .6s;z-index:9;pointer-events:none';
+  $('wrap').appendChild(d);
+  requestAnimationFrame(() => requestAnimationFrame(() => { d.style.opacity = '1'; }));
+  setTimeout(() => { cb(); d.style.opacity = '0'; setTimeout(() => d.remove(), 700); }, 650);
+}
+const M2_SCENE = [
+  { say: ['Marry. Naproti sobě sedí Sabriela a Ondra. Mezi nimi hoří svíčka.'] },
+  { say: ['Dnes jsou její třicetiny. Celý den byla sama a přemýšlela o tom, jak to všechno dopadlo.', 'Analyzovala, vyhodnocovala, co bylo dobré a co ne.'] },
+  { say: ['Ondra se na ni podívá a zeptá se.', '„Vím, že je pro tebe dnešek hodně důležitý. Nechtěla bys ho strávit se mnou?“'] },
+  { ask: { q: 'Co odpovíš?', opts: [
+    { text: 'Radostně: Ano, ráda.', ok: true },
+    { text: 'Dojšatě: Čekala jsem, až se zeptáš.', ok: true },
+    { text: 'Zavažavě: Ještě nevím...', ok: false, reply: 'Ondra se usměje. „Dobře. Počkám.“' }
+  ] } },
+  { flag: 'cry' },
+  { say: ['Oba se rozbrečí. Slzy nejsou smutné.'] },
+  { say: ['„Nechci nic jiného, než abys ho strávil se mnou.“'] },
+  { say: ['Svíčka pomalu dohořívá.'] },
+  { flag: 'marry2Done' },
+  { fade: true }
+];
+function marry2Markup2(s){
+  let o = R(0,0,400,180,'#2a1a10') + R(0,0,400,110,'#3a2418');
+  for (let x = 0; x < 400; x += 40) o += R(x, 0, 2, 110, '#2e1c12');
+  const L = s.m2look || 0;
+  const sabDx = L === 1 ? 1 : 0, ondDx = L === 1 ? -1 : 0, dy = L === 2 ? 2 : 0;
+  o += headAt(120, 50, SAB_HEAD_FRONT, PAL_SAB) + headAt(280, 50, ONDRA_HEAD_FRONT, PAL_ONDRA);
+  o += R(116 - 1 + sabDx, 61 + dy, 2, 2, '#1d1d1d') + R(126 - 1 + sabDx, 61 + dy, 2, 2, '#1d1d1d');
+  o += R(276 - 1 + ondDx, 61 + dy, 2, 2, '#1d1d1d') + R(286 - 1 + ondDx, 61 + dy, 2, 2, '#1d1d1d');
+  if (s.flags.cry) o += R(116,68,2,6,'#8fd3ff') + R(126,68,2,6,'#8fd3ff') + R(276,68,2,6,'#8fd3ff') + R(286,68,2,6,'#8fd3ff');
+  return o;
+}
+const M2_SCENE2 = [
+  { say: ['Marry. Naproti sobě sedí Sabriela a Ondra.'] },
+  { look: 2 },
+  { say: ['Ještě před jejími třicetinami. Sabriela přemýšlí, analyzuje, vyhodnocuje ten den, který přijde.'] },
+  { look: 1 },
+  { say: ['Ondra se na ni podívá a zeptá se.', '„Až budou tvoje třicetiny, nechtěla bys je strávit se mnou?“'] },
+  { look: 2 },
+  { ask: { q: 'Co odpovíš?', opts: [
+    { text: 'Radostně: Ano, ráda.', ok: true },
+    { text: 'Dojšatě: Čekala jsem, až se zeptáš.', ok: true },
+    { text: 'Zavažavě: Ještě nevím...', ok: false, reply: 'Ondra se usměje. „Dobře. Počkám.“' }
+  ] } },
+  { flag: 'cry' },
+  { look: 1 },
+  { say: ['Oba se rozbrečí. Slzy nejsou smutné.'] },
+  { look: 2 },
+  { say: ['„Nechci nic jiného, než abys ho strávil se mnou.“'] },
+  { look: 0 },
+  { say: ['Chvíli mlčí a pak se oba usmějí.'] },
+  { flag: 'marry2Done' },
+  { fade: true }
+];
+function mapExtrasMarkup(s){
+  const dots = (x1, y1, x2, y2) => {
+    let out = '';
+    const n = Math.max(1, Math.round(Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 8));
+    for (let i = 0; i <= n; i++){
+      const x = x1 + (x2 - x1) * i / n, y = y1 + (y2 - y1) * i / n;
+      out += R(Math.round(x) - 1, Math.round(y) - 1, 3, 3, '#d9b56a');
+    }
+    return out;
+  };
+  let o = dots(110, 134, 140, 134) + dots(330, 160, 330, 178) + dots(330, 178, 75, 178) + dots(75, 178, 75, 148) + dots(300, 112, 330, 112);
+  o += R(40,118,70,30, s.flags.bazenDone ? '#ffd27a' : '#5a6a6a') + R(42,120,66,26,'#1e3a2a');
+  o += "<text x='75' y='138' text-anchor='middle' font-size='9' font-weight='700' fill='#fff8e7'>MARRY 2</text>";
+  return o;
+}
+function marry2Markup3(s){
+  let o = R(0,0,400,180,'#2a1a10') + R(0,0,400,120,'#3a2418');
+  for (let x = 0; x < 400; x += 40) o += R(x, 0, 2, 120, '#2e1c12');
+  o += R(160,136,80,5,'#5a3a20') + R(196,141,8,30,'#3a2418') + R(184,170,32,4,'#3a2418');
+  const L = s.m2look || 0;
+  const dx = L === 1 ? 2 : L === 2 ? -2 : 0;
+  const who = s.m2speaker || 'sab';
+  const rows = who === 'sab' ? SAB_HEAD_FRONT : ONDRA_HEAD_FRONT;
+  const pal = who === 'sab' ? Object.assign({}, PAL_SAB, { H: '#7a4a2a' }) : PAL_ONDRA;
+  o += `<g transform='translate(170,40)'>${spriteMarkup(rows, pal, false, 5)}</g>`;
+  o += R(186 + dx, 63, 4, 4, '#1d1d1d') + R(211 + dx, 63, 4, 4, '#1d1d1d');
+  if (s.flags.cry) o += R(187, 72, 3, 12, '#8fd3ff') + R(212, 72, 3, 12, '#8fd3ff');
+  return o;
+}
+const M2_SCENE3 = [
+  { cam: 'sab' },
+  { say: ['Marry. Sabriela sedí na barové stoličce a dívá se do sklenice.'] },
+  { say: ['Pořád její v hlavě běží, co se za poslední roky stalo. Analyzuje to, hodnotí a nemůže přestat.', 'Blíží se její třicetiny a ona si je představuje sama.'] },
+  { cam: 'ond' },
+  { say: ['Ondra se k ní otočí a chvíli mlcí.', '„Vím, že ti jsou třicetiny hodně důležité. Chtěla bys je strávit se mnou?“'] },
+  { cam: 'sab' },
+  { ask: { q: 'Co odpovíš?', opts: [
+    { text: 'Radostně: Ano, ráda.', ok: true },
+    { text: 'Dojátě: Čekala jsem, až se zeptáš.', ok: true },
+    { text: 'Zavažavě: Ještě nevím...', ok: false, reply: 'Ondra se pousměje. „Dobře. Počkám.“' }
+  ] } },
+  { flag: 'cry' },
+  { say: ['Sabriele se oči zalijí slzami, aniž by to chtěla.'] },
+  { cam: 'ond' },
+  { say: ['Ondrovi se zachvěje hlas.'] },
+  { cam: 'sab' },
+  { say: ['„Nechci nic jiného, než abys ho strávil se mnou.“'] },
+  { cam: 'ond' },
+  { say: ['Oba se rozbrečí. Slzy nejsou smutné.'] },
+  { flag: 'marry2Done' },
+  { fade: true }
+];
+function devJump2(v){
+  if (v !== 'map2' && v !== 'marry2') return devJump(v);
+  $('dlg').hidden = true; state.busy = false; state.lines = null; state.lineCb = null;
+  state.target = null; state.onArrive = null;
+  $('dlgChoices').innerHTML = ''; $('closeup').hidden = true; $('closeup').innerHTML = '';
+  $('strobe').classList.remove('on');
+  state.inv = []; state.flags = {}; state.active = 'sab'; state.pose = ''; state.crowd = null;
+  state.pos = { sab: 60, ond: 210 };
+  $('inv').innerHTML = '';
+  $('dev').value = v;
+  ['kap1Done', 'kap2Done', 'kap3Done', 'chataDone', 'interierDone', 'bedDone', 'bazenDone'].forEach(f => state.flags[f] = true);
+  $('title').hidden = true;
+  exec({ scene: v === 'map2' ? 'map' : 'marry2' }, () => {});
+}
+const M2_SCENE4 = [
+  { cam: 'sab' },
+  { look: 2 },
+  { say: ['Marry. Sabriela sedí na barové stoličce a zamyšleně se dívá do sklenice.'] },
+  { say: ['V hlavě má spoustu myšlenek. Přemýšlí o tom, co se za poslední dobu stalo, a hodnotí, jak to všechno dopadlo.'] },
+  { cam: 'ond' },
+  { look: 1 },
+  { say: ['Ondra se k ní otočí. Chvíli mlcí a pak promluví tiše.', '„Vím, že se blíží něco, co je pro tebe hodně důležité. Vím, jak ten den vždycky trávíš a co pro tebe znamená.“'] },
+  { say: ['„Protočž se ti ptám. Chtěla bys ho strávit se mnou?“'] },
+  { cam: 'sab' },
+  { look: 2 },
+  { ask: { q: 'Co odpovíš?', opts: [
+    { text: 'Radostně: Ano, ráda.', ok: true },
+    { text: 'Dojátě: Čekala jsem, až se zeptáš.', ok: true },
+    { text: 'Zavažavě: Ještě nevím...', ok: false, reply: 'Ondra se pousměje. „Dobře. Počkám.“' }
+  ] } },
+  { look: 0 },
+  { flag: 'cry' },
+  { say: ['Sabriele se oči zalijí slzami, aniž by to chtěla.'] },
+  { cam: 'ond' },
+  { say: ['Ondrovi se zachvěje hlas.'] },
+  { cam: 'sab' },
+  { say: ['„Nechci nic jiného, než abys ho strávil se mnou.“'] },
+  { cam: 'ond' },
+  { say: ['Oba se rozbrečí. Slzy nejsou smutné.'] },
+  { flag: 'marry2Done' },
+  { fade: true }
+];
+function spriteMarkup(rows, pal, mirror, cell){
+  const w = Math.max(...rows.map(r => r.length));
+  let out = '';
+  rows.forEach((row, r) => {
+    let s = row.padEnd(w, '.');
+    if (mirror) s = s.split('').reverse().join('');
+    for (let c = 0; c < s.length; c++){
+      const ch = s[c];
+      if (ch === '.' || !pal[ch]) continue;
+      out += `<rect x="${c*cell}" y="${r*cell}" width="${cell}" height="${cell}" fill="${pal[ch]}"/>`;
+    }
+  });
+  return out;
+}
+
+/* ===================== SCÉNA ===================== */
+function wallStripes(){
+  let s = '';
+  for (let x = 0; x < 400; x += 16) s += R(x, 0, 2, 110, '#34241b');
+  return s;
+}
+function bottles(){
+  const cols = ['#2e7d4f','#8e3b2d','#d9a441','#2e4f7d'];
+  let s = '';
+  for (let i = 0, x = 268; x < 380; i++, x += 14){
+    s += R(x, 36, 8, 16, cols[i % cols.length]);
+    s += R(x + 2, 32, 4, 4, cols[i % cols.length]);
+  }
+  return s;
+}
+function barmanMarkup(){
+  return `<g transform="translate(306,60)">${spriteMarkup(BARMAN_ROWS, PAL_BAR, false, 2)}</g>`;
+}
+
+const BG = () =>
+  R(0, 0, 400, 180, '#3a2a22') +
+  R(0, 0, 400, 110, '#4b3427') +
+  wallStripes() +
+  R(56, 16, 8, 8, '#ffd27a') +
+  R(52, 12, 16, 16, '#ffd27a', ' opacity="0.2"') +
+  R(110, 36, 34, 44, '#2f4a5a') +
+  R(262, 14, 120, 22, '#c0392b') +
+  `<text x="322" y="29" text-anchor="middle" font-size="11" font-weight="700" fill="#fff8e7">U ZRZAVÉ MARRY</text>` +
+  R(262, 52, 126, 5, '#2a1c14') +
+  bottles() +
+  R(0, 160, 400, 20, '#6b4a2b') +
+  [40,80,120,160,200,240,280,320,360].map(x => R(x, 160, 2, 20, '#553a22')).join('') +
+  R(30, 118, 74, 5, '#7a5235') +
+  R(66, 123, 6, 37, '#4a3020') +
+  barmanMarkup() +
+  R(248, 100, 152, 60, '#5a3b26') +
+  R(244, 96, 160, 7, '#7a5235') +
+  [256,272,288,304,320,336,352].map(x => R(x, 110, 2, 46, '#4a2f1e')).join('');
+
+const OBJS = (s) => {
+  let o =
+    '<g id="slotG">' +
+      R(176, 60, 48, 100, '#1f8a8a') +
+      R(176, 112, 48, 5, '#ffd27a') +
+      R(172, 46, 56, 16, '#ff5c8a') +
+      `<text x="200" y="57" font-size="8" text-anchor="middle" fill="#fff" font-weight="700">PŘÍBĚHÁŘ</text>` +
+      R(182, 72, 36, 36, '#0d1b2a') +
+      `<text x="200" y="84" font-size="8" text-anchor="middle" fill="#ffd27a" font-weight="700">LIFE</text>` +
+      `<text id="reel0" x="191" y="102" font-size="9" text-anchor="middle" fill="#7CFC9A">♥</text>` +
+      `<text id="reel1" x="200" y="102" font-size="9" text-anchor="middle" fill="#7CFC9A">♥</text>` +
+      `<text id="reel2" x="209" y="102" font-size="9" text-anchor="middle" fill="#7CFC9A">♥</text>` +
+      R(180, 122, 40, 8, '#15152e') +
+      `<circle cx="200" cy="136" r="3" fill="#e74c3c"/>` +
+    '</g>';
+  if (s.flags.drinkDone && !s.flags.coinTaken){
+    o += '<g id="coin">' +
+      R(234, 150, 4, 2, '#b8860b') + R(232, 152, 8, 4, '#f2c94c') + R(234, 156, 4, 2, '#b8860b') +
+      '</g>';
+  }
+  return o;
+};
+
+/* ===================== STAV ===================== */
+const $ = id => document.getElementById(id);
+const svg = $('scene'), bgG = $('bg'), objG = $('objs'), sabG = $('sabG'), ondG = $('ondG');
+const state = {
+  sceneId: 'kap1', x: 60, pose: '', active: 'sab', pos: { sab: 230, ond: 92 }, target: null, onArrive: null,
+  inv: [], flags: {}, busy: false, lines: null, lineCb: null
+};
+const scene = () => SCENES[state.sceneId];
+
+/* ===================== RENDER ===================== */
+function olomIntro(next){
+  const ov=document.createElement('div');
+  ov.style.cssText='position:absolute;inset:0;background:#140c08;color:#f7ead2;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;text-align:center;z-index:50;font-size:17px;line-height:1.6;cursor:pointer';
+  const lines=['Sabriela dorazila do Olomouce.','Blíží se půlnoc a s ní její třicátiny. Je to pro ní velmi důležitý den.','Do tohoto dne pustila Ondru.'];
+  const p=document.createElement('p'); p.style.margin='0'; ov.appendChild(p);
+  const hint=document.createElement('div'); hint.textContent='Klepni pro pokračování'; hint.style.cssText='margin-top:18px;font-size:12px;opacity:.6'; ov.appendChild(hint);
+  $('wrap').appendChild(ov);
+  let li=0, ci=0, timer=null, typing=false;
+  function finish(){ clearInterval(timer); timer=null; typing=false; p.textContent=lines[li]; }
+  function start(){ ci=0; p.textContent=''; typing=true; clearInterval(timer); timer=setInterval(()=>{ ci++; p.textContent=lines[li].slice(0,ci); if(ci>=lines[li].length) finish(); },35); }
+  start();
+  ov.addEventListener('click', e=>{
+    e.stopPropagation();
+    if (typing){ finish(); return; }
+    if (li<lines.length-1){ li++; start(); return; }
+    ov.remove(); next();
+  });
+}
+SCENES.olomLoft = { hotspots: [] };
+function loftHotspots(){
+  return [
+    { id: 'fuet', x: 236, y: 80, w: 70, h: 22, show: s => s.flags.bathDone && !s.flags.fuetCut, stand: 262, onTap: [{ fuetGame: true }] },
+    { id: 'door', x: 140, y: 56, w: 30, h: 40, show: s => !s.flags.bathDone, stand: 155, onTap: [{ say: ['Ze dveří do koupelny se ozývá šplouchání.'] }, { bath: true }] }
+  ];
+}
+function R2(x,y,w,h,f){ return "<rect x='"+x+"' y='"+y+"' width='"+w+"' height='"+h+"' fill='"+f+"'/>"; }
+function loftMarkup(s){
+  const m = (typeof s.clockMin === 'number') ? s.clockMin : 1420, hh = Math.floor(m / 60) % 12, mm = m % 60;
+  const ha = (hh + mm / 60) * 30, ma = mm * 6;
+  const hand = (a, len, w, col) => { const r = a * Math.PI / 180; return "<line x1='336' y1='62' x2='" + (336 + len * Math.sin(r)).toFixed(1) + "' y2='" + (62 - len * Math.cos(r)).toFixed(1) + "' stroke='" + col + "' stroke-width='" + w + "'/>"; };
+  let o = R2(0,0,400,120,'#6e4a3a');
+  for (let y = 0; y < 120; y += 10) o += R2(0, y + 9, 400, 1, '#5a3a2c');
+  o += R2(0,120,400,60,'#6b4f3a');
+  for (let x = 0; x < 400; x += 40) o += R2(x,120,1,60,'#55402e');
+  o += "<polygon points='0,0 400,0 400,36 200,8 0,36' fill='#2b2238'/>" + R2(0,36,400,3,'#5b4a6e');
+  o += R2(36,46,62,54,'#d9d4cc') + R2(40,50,54,46,'#1e3a5a') + R2(66,50,4,46,'#d9d4cc') + R2(40,71,54,4,'#d9d4cc');
+  o += R2(34,100,66,6,'#c99a6a') + R2(28,50,6,58,'#8a6a4e');
+  o += "<circle cx='336' cy='62' r='28' fill='#efe2c4' stroke='#5a3a20' stroke-width='3'/>";
+  o += "<circle cx='336' cy='62' r='20' fill='none' stroke='#2b2238' stroke-width='4' stroke-dasharray='2 8.47' transform='rotate(-90 336 62)'/>";
+  o += hand(ha, 13, 3, '#2b2238') + hand(ma, 20, 2, '#2b2238') + "<circle cx='336' cy='62' r='2' fill='#b8553e'/>";
+  o += R2(220,96,160,6,'#c99a6a') + R2(220,102,160,34,'#4a3d5c');
+  o += R2(224,106,32,26,'#3a2f4a') + R2(262,106,32,26,'#3a2f4a') + R2(300,106,32,26,'#3a2f4a');
+  o += R2(236,90,64,6,'#b08a5a') + R2(240,84,56,8,'#b8553e');
+  o += R2(304,91,16,2,'#c0c6cc') + R2(302,90,4,4,'#8a6a4e');
+  o += R2(128,112,70,16,'#7a3a5a') + R2(124,98,8,30,'#7a3a5a');
+  o += R2(104,136,90,4,'#b8553e');
+  o += R2(354,104,28,18,'#8a4a2a') + "<polygon points='356,104 362,80 368,96 372,76 378,104' fill='#3fbf5f'/>";
+  o += R2(140,56,30,40,'#3a2016') + R2(164,76,2,2,'#ffd27a');
+  o += '<g transform="translate(' + (s.pos.ond - 16) + ',' + (GROUND - 52) + ')">' + spriteMarkup(ONDRA_FRONT_COMP, PAL_ONDRA, false, CELL) + '</g>';
+  return o;
+}
+function olomFuet(next){
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:absolute;inset:0;background:#140c08;color:#f7ead2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;z-index:50;font-size:14px;text-align:center;';
+  ov.addEventListener('click', e => e.stopPropagation());
+  const t = document.createElement('p'); t.style.margin = '0 0 14px'; t.textContent = 'Nakrájej fuet na plátky. Klepni na další řez zleva.';
+  const bar = document.createElement('div'); bar.style.cssText = 'display:flex;width:min(320px,90%);height:56px;background:#b8553e;border-radius:28px;overflow:hidden;';
+  const zones = [];
+  for (let i = 0; i < 6; i++){ const z = document.createElement('div'); z.style.cssText = 'flex:1;border-right:2px solid #8a3a2a;cursor:pointer;background:#b8553e;'; if (i === 5) z.style.borderRight = 'none'; bar.appendChild(z); zones.push(z); }
+  const info = document.createElement('div'); info.style.cssText = 'margin-top:14px;min-height:20px;';
+  ov.appendChild(t); ov.appendChild(bar); ov.appendChild(info); $('wrap').appendChild(ov);
+  let cut = 0, finished = false;
+  zones.forEach((z, i) => z.addEventListener('click', e => {
+    e.stopPropagation();
+    if (finished) return;
+    if (i !== cut){ info.textContent = 'Ještě ne, další řez je zleva.'; return; }
+    z.style.background = '#f0e0c0'; cut++; info.textContent = cut + ' / 6';
+    if (cut === 6){
+      finished = true; info.textContent = 'Hotovo.';
+      state.flags.fuetCut = true; state.clockMin = 0; refreshQuest();
+      setTimeout(() => { ov.remove(); renderObjs(); olomMidnight(next); }, 700);
+    }
+  }));
+}
+function addTears(){
+  [state.pos.sab, state.pos.ond].forEach(x => {
+    [-4, 4].forEach(off => {
+      const d = document.createElement('div');
+      d.style.cssText = 'position:absolute;width:4px;height:8px;background:#8fd3ff;left:calc(' + (x / 400 * 100) + '% + ' + (off) + 'px);top:61%;pointer-events:none;z-index:40;';
+      $('wrap').appendChild(d);
+      d.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(14px)',opacity:0.2}],{duration:1600,iterations:Infinity});
+    });
+  });
+}
+function tromsoFlight(next){
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:absolute;inset:0;background:#0b1d2e;z-index:50;';
+  ov.innerHTML = "<svg width='100%' height='100%' viewBox='0 0 400 180' shape-rendering='crispEdges' font-family='Courier New, monospace'><polygon points='60,60 120,40 200,30 260,35 330,50 350,90 300,120 250,130 200,150 150,140 100,120 70,100' fill='#2f5d3a'/><line x1='20' y1='30' x2='380' y2='30' stroke='#8fd3ff' stroke-dasharray='4 4'/><text x='24' y='24' font-size='9' fill='#8fd3ff'>polární kruh</text><polyline points='200,92 180,96 220,12' fill='none' stroke='#ffd27a' stroke-width='1.5' stroke-dasharray='3 3'/><text x='192' y='110' font-size='9' fill='#fff8e7'>Česko</text><text x='140' y='100' font-size='9' fill='#fff8e7'>Frankfurt</text><text x='226' y='10' font-size='9' fill='#fff8e7'>Tromsø</text><g id='plane'><rect x='-4' y='-2' width='8' height='4' fill='#ffffff'/><rect x='-2' y='-6' width='3' height='4' fill='#ffffff'/></g></svg>";
+  const cap = document.createElement('div');
+  cap.style.cssText = 'position:absolute;left:0;right:0;bottom:10px;text-align:center;color:#f7ead2;font-size:14px;';
+  cap.textContent = 'Letí se do Tromsø, za polární kruh.';
+  ov.appendChild(cap);
+  $('wrap').appendChild(ov);
+  ov.querySelector('#plane').animate([{transform:'translate(200px,92px)'},{transform:'translate(180px,96px)'},{transform:'translate(220px,12px)'}],{duration:3200,fill:'forwards',easing:'ease-in-out'});
+  setTimeout(() => { ov.remove(); next(); }, 3600);
+}
+function tromsoSki(next){
+  const W = 400, H = 180, END_Y = 126, NEED = 10;
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:absolute;inset:0;background:#dfeaf2;z-index:50;';
+  ov.addEventListener('click', e => e.stopPropagation());
+  ov.addEventListener('pointerdown', e => e.stopPropagation());
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  cv.style.cssText = 'width:100%;height:100%;display:block;touch-action:none;image-rendering:pixelated;';
+  const hud = document.createElement('div');
+  hud.style.cssText = 'position:absolute;top:6px;left:8px;font:bold 13px "Courier New",monospace;color:#2a2a33;pointer-events:none;';
+  const msg = document.createElement('div');
+  msg.style.cssText = 'position:absolute;left:0;right:0;top:42%;text-align:center;font:bold 14px "Courier New",monospace;color:#2a2a33;background:rgba(255,255,255,.85);padding:6px;display:none;pointer-events:none;';
+  const hint = document.createElement('div');
+  hint.style.cssText = 'position:absolute;left:0;right:0;bottom:6px;text-align:center;font:12px "Courier New",monospace;color:#f7ead2;pointer-events:none;';
+  hint.textContent = 'Drž prst vlevo nebo vpravo. Sbírej srdíčka, vyhýbej se stromům a skalám.';
+  ov.appendChild(cv); ov.appendChild(hud); ov.appendChild(msg); ov.appendChild(hint); $('wrap').appendChild(ov);
+  setTimeout(() => { hint.style.display = 'none'; }, 6000);
+  const ctx = cv.getContext('2d');
+
+  function drawRows(g, rows, pal, x, y, c){
+    for (let r = 0; r < rows.length; r++) for (let k = 0; k < rows[r].length; k++){
+      const ch = rows[r][k]; if (ch === '.') continue;
+      g.fillStyle = pal[ch]; g.fillRect(x + k * c, y + r * c, c, c);
+    }
+  }
+  const SKIER = ['...W...','..RRR..','.RRRRR.','.HSSSH.','.HESEH.','.HSSSH.','LBBBBBL','LBBBBBL','L.PPP.L','L.P.P.L','.K...K.','.K...K.','.K...K.'];
+  const PAL_SKIER = { W:'#ffffff', R:'#c04a5a', H:'#6b3f24', S:'#f3c9a0', E:'#2b5a9a', B:'#3d78b8', P:'#2a3a5a', K:'#2a2a33', L:'#8a6a4e' };
+  const ONDR = ['..YYY..','.YYYYY.','.YSSSY.','.SESES.','.SSSSS.','.GGGGG.','GGGGGGG','.GGGGG.','.PP.PP.','.PP.PP.'];
+  const PAL_ONDR = { Y:'#e8c76a', S:'#f3c9a0', E:'#6f8fa8', G:'#4a8a5a', P:'#2a3a5a' };
+  const HEART = ['.XX.XX.','XXXXXXX','XXXXXXX','.XXXXX.','..XXX..','...X...'];
+  const PAL_H = { X:'#ff4f86' };
+
+  let seed = 7; const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const pathx = y => 200 + 90 * Math.sin((y - 22) / 104 * Math.PI * 2.5);
+  const hearts0 = [];
+  for (let i = 0; i < 12; i++){ const y = 30 + i * 8; hearts0.push({ x: Math.max(30, Math.min(370, pathx(y) + (i % 2 ? 14 : -14))), y: y, got: false }); }
+  const route = []; for (let y = 22; y <= 130; y += 2) [-14, 0, 14].forEach(o => route.push({ x: pathx(y) + o, y: y }));
+  const obs = []; let tries = 0;
+  while (obs.length < 15 && tries++ < 3000){
+    const y = 40 + rnd() * 82, x = 26 + rnd() * 348;
+    if (route.some(q => Math.hypot(q.x - x, q.y - (y - 6)) < 30)) continue;
+    if (x > 310 && y > 100) continue;
+    if (obs.some(o => Math.hypot(o.x - x, o.y - y) < 24)) continue;
+    obs.push({ x: x, y: y, t: rnd() < 0.62 ? 't' : 'r' });
+  }
+  obs.sort((a, b) => a.y - b.y);
+
+  const bg = document.createElement('canvas'); bg.width = W; bg.height = H;
+  const g = bg.getContext('2d');
+  g.fillStyle = '#eef4f9'; g.fillRect(0, 0, W, 150);
+  g.fillStyle = '#d5e3ec'; for (let i = 0; i < 90; i++) g.fillRect(Math.floor(rnd() * 380) + 10, Math.floor(rnd() * 140) + 8, 3 + Math.floor(rnd() * 4), 1);
+  g.fillStyle = '#7d8590'; for (let y = 0; y < 150; y += 6){ g.fillRect(0, y, 10 + Math.floor(rnd() * 8), 6); g.fillRect(W - 10 - Math.floor(rnd() * 8), y, 20, 6); }
+  g.fillStyle = '#6b7280'; for (let x = 0; x < W; x += 20){ const h = 6 + Math.floor(rnd() * 8); g.fillRect(x, 0, 20, h); g.fillStyle = '#ffffff'; g.fillRect(x + 6, 0, 8, 3); g.fillStyle = '#6b7280'; }
+  g.fillStyle = '#2f6fa8'; g.fillRect(0, 150, W, 30);
+  g.fillStyle = '#255a8a'; for (let x = 4; x < W; x += 24){ g.fillRect(x, 160, 10, 2); g.fillRect(x + 12, 170, 10, 2); }
+  g.fillStyle = '#ffffff'; for (let x = 0; x < W; x += 8) g.fillRect(x, 149, 4, 2);
+  obs.forEach(o => {
+    if (o.t === 't'){
+      g.fillStyle = '#5a3a20'; g.fillRect(o.x - 1, o.y - 3, 3, 3);
+      g.fillStyle = '#1f5a33'; g.fillRect(o.x - 6, o.y - 7, 13, 4); g.fillRect(o.x - 4, o.y - 11, 9, 4); g.fillRect(o.x - 2, o.y - 15, 5, 4);
+      g.fillStyle = '#ffffff'; g.fillRect(o.x - 1, o.y - 16, 3, 1); g.fillRect(o.x - 5, o.y - 7, 3, 1);
+    } else {
+      g.fillStyle = '#7d8590'; g.fillRect(o.x - 5, o.y - 4, 11, 5);
+      g.fillStyle = '#8b95a1'; g.fillRect(o.x - 3, o.y - 6, 7, 2);
+      g.fillStyle = '#c8d0d8'; g.fillRect(o.x - 2, o.y - 5, 3, 1);
+      g.fillStyle = '#5a6270'; g.fillRect(o.x - 5, o.y + 1, 11, 1);
+    }
+  });
+  drawRows(g, ONDR, PAL_ONDR, 333, 130, 2);
+
+  let px, py, dir, meter, got, hearts, hitUntil, drainT, over, finished, raf, last, tmr;
+  function reset(){ px = 200; py = 22; dir = 0; meter = 4; got = 0; hearts = hearts0.map(h => ({ x: h.x, y: h.y, got: false })); hitUntil = 0; drainT = 0; over = false; }
+  reset();
+  function showMsg(t, ms){ msg.textContent = t; msg.style.display = 'block'; clearTimeout(tmr); tmr = setTimeout(() => { msg.style.display = 'none'; }, ms); }
+  const onDown = e => { const r = cv.getBoundingClientRect(); dir = (e.clientX - r.left) < r.width / 2 ? -1 : 1; };
+  const onUp = () => { dir = 0; };
+  const onKey = e => { if (e.key === 'ArrowLeft') dir = -1; else if (e.key === 'ArrowRight') dir = 1; };
+  const onKeyUp = e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') dir = 0; };
+  cv.addEventListener('pointerdown', onDown);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('keydown', onKey);
+  window.addEventListener('keyup', onKeyUp);
+  function cleanup(){ finished = true; cancelAnimationFrame(raf); clearTimeout(tmr); window.removeEventListener('pointerup', onUp); window.removeEventListener('keydown', onKey); window.removeEventListener('keyup', onKeyUp); }
+  function restart(text){ over = true; showMsg(text, 1600); setTimeout(() => { reset(); last = 0; }, 1700); }
+
+  function frame(now){
+    if (finished) return;
+    if (!last) last = now;
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (!over){
+      px = Math.max(26, Math.min(W - 26, px + dir * 55 * dt));
+      py += 2.6 * dt;
+      drainT += dt; if (drainT >= 15){ drainT = 0; meter--; }
+      hearts.forEach(h => { if (!h.got && Math.hypot(h.x - px, h.y - py) < 14){ h.got = true; got++; meter = Math.min(meter + 1, 5); } });
+      if (now > hitUntil) obs.forEach(o => {
+        const cy = o.t === 't' ? o.y - 8 : o.y - 3, rad = o.t === 't' ? 14 : 12;
+        if (Math.hypot(o.x - px, cy - py) < rad){ meter--; hitUntil = now + 1200; px += (px < o.x ? -1 : 1) * 14; }
+      });
+      if (got >= NEED){
+        cleanup(); hud.textContent = 'Hotovo.'; meter = 5; draw(now);
+        state.flags.tromsoDone = true;
+        setTimeout(() => { ov.remove(); say(['Srdíčka jsou doplněná.'], () => exec({ fade: true }, () => exec({ scene: 'map' }, next))); }, 1200);
+        return;
+      }
+      if (meter <= 0) restart('Ondrovi došla srdíčka. Začínáme znovu.');
+      else if (py >= END_Y) restart('Dojela jsi k fjordu, ale srdíček je málo. Zkusíme znovu.');
+    }
+    draw(now);
+    raf = requestAnimationFrame(frame);
+  }
+  function draw(now){
+    ctx.drawImage(bg, 0, 0);
+    hearts.forEach(h => { if (h.got) return; const bob = Math.round(Math.sin(now / 250 + h.y)); drawRows(ctx, HEART, PAL_H, Math.round(h.x - 7), Math.round(h.y - 6) + bob, 2); ctx.fillStyle = '#ffd1e0'; ctx.fillRect(Math.round(h.x - 5), Math.round(h.y - 4) + bob, 2, 2); });
+    if (!(now < hitUntil && Math.floor(now / 100) % 2)) drawRows(ctx, SKIER, PAL_SKIER, Math.round(px - 7), Math.round(py - 13), 2);
+    for (let i = 0; i < Math.max(0, meter); i++) drawRows(ctx, HEART, PAL_H, 321 + i * 9, 119, 1);
+    hud.textContent = 'Srdíčka: ' + got + ' / ' + NEED;
+  }
+  raf = requestAnimationFrame(frame);
+}
+function olomMidnight(next){
+  clearInterval(state.clockTimer); state.clockTimer = null;
+  state.clockMin = 0; renderObjs();
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:absolute;inset:0;z-index:50;pointer-events:none;overflow:hidden;';
+  $('wrap').appendChild(ov);
+  ov.animate([{backgroundColor:'rgba(255,255,255,0)'},{backgroundColor:'rgba(255,255,255,0.7)'},{backgroundColor:'rgba(255,255,255,0)'}],{duration:900,fill:'forwards'});
+  const cx = (state.x || 60) / 400 * 100;
+  const cols = ['#ffd27a','#ff5c8a','#fff8e7'];
+  for (let i = 0; i < 70; i++){
+    const d = document.createElement('div');
+    const ang = Math.random() * Math.PI * 2, dist = 40 + Math.random() * 90;
+    d.style.cssText = 'position:absolute;width:6px;height:6px;left:' + cx + '%;top:50%;background:' + cols[i % 3] + ';';
+    ov.appendChild(d);
+    d.animate([{transform:'translate(0,0)',opacity:1},{transform:'translate(' + (Math.cos(ang)*dist).toFixed(1) + 'px,' + (Math.sin(ang)*dist).toFixed(1) + 'px)',opacity:0}],{duration:1400 + Math.random()*600,easing:'ease-out',fill:'forwards'});
+  }
+  setTimeout(() => {
+    ov.remove();
+    say(['Hodiny klikly půlnoc.', 'Kolem Sabriely vyletěly jiskry.'], () =>
+      say(['Ondra jí podává playlist. Na obalu je napsáno Třicátiny.', '„Tohle je pro tebe. Ať je tenhle den hezký.“'], () => {
+        state.inv.push('playlist'); refreshInv();
+        const cry = document.createElement('div');
+        cry.style.cssText = 'position:absolute;inset:0;z-index:5;pointer-events:none;';
+        cry.style.pointerEvents = 'none';
+        cry.innerHTML = "<svg width='100%' height='100%' viewBox='0 0 400 180' shape-rendering='crispEdges'>" + headAt(state.x, 108, SAB_HEAD_FRONT, PAL_SAB) + headAt(state.pos.ond, 108, ONDRA_HEAD_FRONT, PAL_ONDRA) + R(state.x - 8, 124, 2, 6, '#8fd3ff') + R(state.x + 6, 124, 2, 6, '#8fd3ff') + R(state.pos.ond - 8, 124, 2, 6, '#8fd3ff') + R(state.pos.ond + 6, 124, 2, 6, '#8fd3ff') + '</svg>';
+        $('wrap').appendChild(cry);
+        say(['Oba se rozbrečí.'], () => {
+          heartBig();
+          say(['Sabriela se stala třicátnicí.'], () => { cry.remove(); state.flags.loftDone = true; exec({ fade: true }, () => exec({ scene: 'map' }, next)); });
+        });
+      }));
+  }, 1800);
+}
+function olomBath(next){
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:absolute;inset:0;background:#140c08;color:#f7ead2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;z-index:50;font-size:14px;';
+  const cv = document.createElement('canvas'); cv.width = 380; cv.height = 200;
+  cv.style.cssText = 'width:min(380px,96%);height:auto;border-radius:10px;touch-action:none;cursor:pointer';
+  const info = document.createElement('div'); info.style.cssText = 'margin-top:10px;';
+  info.textContent = 'Vytři pěnu z vany a podlahy. 0 %';
+  ov.appendChild(cv); ov.appendChild(info); $('wrap').appendChild(ov);
+  const ctx = cv.getContext('2d');
+  const W = 380, H = 200, CS = 10, COLS = 38, ROWS = 20;
+  const TUB = { x: 60, y: 70, w: 260, h: 80 };
+  const foam = []; let total = 0, cleared = 0, done = false;
+  for (let r = 0; r < ROWS; r++){ foam[r] = []; for (let c = 0; c < COLS; c++){ const x = c * CS + 5, y = r * CS + 5; const on = (x >= 40 && x <= 340 && y >= 60 && y <= H) && !(x >= 110 && x <= 270 && y >= 95 && y <= 140) || (x >= TUB.x && x <= TUB.x + TUB.w && y >= TUB.y && y <= TUB.y + 14); foam[r][c] = on ? 1 : 0; if (on) total++; } }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#e6edf2'; ctx.fillRect(0,0,W,160);
+    ctx.fillStyle = '#d3dde5'; for (let x = 0; x < W; x += 40) ctx.fillRect(x,0,1,160);
+    ctx.fillStyle = '#b8c4cc'; ctx.fillRect(0,160,W,40);
+    ctx.fillStyle = '#a3b0b9'; for (let x = 0; x < W; x += 20) ctx.fillRect(x,160,1,40);
+    ctx.fillStyle = '#9aa3ad'; ctx.fillRect(180,30,10,40); ctx.fillRect(172,26,26,6);
+    ctx.fillStyle = '#dfe7ed'; ctx.fillRect(TUB.x,TUB.y,TUB.w,TUB.h);
+    ctx.fillStyle = '#c4d0d9'; ctx.fillRect(TUB.x+8,TUB.y+8,TUB.w-16,TUB.h-16);
+    ctx.fillStyle = '#7fb8d8'; ctx.fillRect(TUB.x+12,TUB.y+18,TUB.w-24,TUB.h-30);
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++){ if (!foam[r][c]) continue; ctx.fillStyle = (r+c)%3 === 0 ? '#dfe8ef' : '#f5f8fa'; ctx.fillRect(c*CS, r*CS, CS, CS); }
+  }
+  function wipe(x, y){
+    const R = 2, cc = Math.floor(x / CS), rr = Math.floor(y / CS);
+    for (let r = rr-R; r <= rr+R; r++) for (let c = cc-R; c <= cc+R; c++){
+      if (r < 0 || c < 0 || r >= ROWS || c >= COLS) continue;
+      if (foam[r][c] && Math.hypot(c-cc, r-rr) <= R){ foam[r][c] = 0; cleared++; }
+    }
+  }
+  function update(){
+    const p = total ? Math.round(cleared / total * 100) : 0;
+    info.textContent = 'Vytři pěnu z vany a podlahy. ' + p + ' %';
+    if (p >= 90 && !done){
+      done = true;
+      info.textContent = 'Hotovo. Vana i podlaha jsou čisté.';
+      setTimeout(() => { ov.remove(); state.flags.bathDone = true; refreshQuest(); say(['Voda přestala téct. Na lince zbyl fuet, ten teď nakrájím.'], next); }, 900);
+    }
+  }
+  let down = false;
+  function pos(e){ const b = cv.getBoundingClientRect(); return [(e.clientX-b.left)*W/b.width, (e.clientY-b.top)*H/b.height]; }
+  cv.addEventListener('pointerdown', e => { down = true; const [x,y] = pos(e); wipe(x,y); draw(); update(); });
+  cv.addEventListener('pointermove', e => { if (!down || done) return; const [x,y] = pos(e); wipe(x,y); draw(); update(); });
+  window.addEventListener('pointerup', () => { down = false; });
+  draw(); update();
+}
+function renderBg(){ bgG.innerHTML = (state.sceneId === 'kap2' || state.sceneId === 'map' || state.sceneId === 'chata' || state.sceneId === 'interier' || state.sceneId === 'kopriv' || state.sceneId === 'bazen' || state.sceneId === 'marry2' || state.sceneId === 'olomLoft') ? '' : BG(); }
+function renderObjs(){ objG.innerHTML = state.sceneId === 'kap2' ? cardsMarkup() : state.sceneId === 'map' ? mapMarkup(state) : state.sceneId === 'chata' ? chataMarkup(state) : state.sceneId === 'interier' ? interierMarkup2(state) : state.sceneId === 'kopriv' ? koprivMarkup5(state) : state.sceneId === 'bazen' ? bazenMarkup2(state) : state.sceneId === 'marry2' ? marry2Markup3(state) : state.sceneId === 'olomLoft' ? loftMarkup(state) : OBJS(state); ondG.style.display = ((state.sceneId === 'chata' || state.sceneId === 'interier') && !state.flags.inBed_ond) ? '' : 'none'; if (state.sceneId === 'bazen') sabG.style.display = 'none'; drawHud(); }
+function drawChar(){
+  if ((state.sceneId === 'chata' || state.sceneId === 'interier' || state.sceneId === 'kopriv' || state.sceneId === 'bazen') && state.active === 'ond'){ ondG.innerHTML = spriteMarkup(state.pose === 'left' || state.pose === 'right' ? ONDRA_RIGHT_COMP : ONDRA_FRONT_COMP, PAL_ONDRA, state.pose === 'left', CELL); return; }
+  const pose = state.pose;
+  if (pose === 'front') sabG.innerHTML = auraMarkup() + spriteMarkup(SAB_FRONT_COMP, PAL_SAB, false, CELL);
+  else sabG.innerHTML = auraMarkup() + spriteMarkup(SAB_RIGHT_COMP, PAL_SAB, pose === 'left', CELL);
+}
+function placeChar(){
+  if (state.sceneId === 'chata' || state.sceneId === 'interier' || state.sceneId === 'kopriv' || state.sceneId === 'bazen'){ state.pos[state.active] = state.x; sabG.setAttribute('transform', `translate(${state.pos.sab - 16},${GROUND - 52})`); ondG.setAttribute('transform', `translate(${state.pos.ond - 16},${GROUND - 52})`); return; }
+  sabG.setAttribute('transform', `translate(${state.x - 16},${GROUND - 52}) rotate(${state.sway || 0} 16 50)`);
+}
+function setPose(p){
+  if (p !== state.pose){ state.pose = p; drawChar(); }
+}
+function refreshQuest(){
+  if (state.sceneId === 'marry2'){ $('quest').textContent = 'Úkol: poslouchej Ondru'; return; }
+  if (state.sceneId === 'bazen'){ $('quest').textContent = bazenQuest2(); return; }
+  if (state.sceneId === 'olomLoft'){ $('quest').textContent = state.flags.fuetCut ? 'Hotovo' : (state.flags.bathDone ? 'Úkol: nakrájej fuet' : 'Úkol: podívej se do koupelny'); return; }
+  if (state.sceneId === 'kopriv'){ $('quest').textContent = koprivQuest(); return; }
+  if (state.sceneId === 'interier'){ $('quest').textContent = interierQuest2(); return; }
+  if (state.sceneId === 'chata'){ $('quest').textContent = chataQuest(); return; }
+  if (state.sceneId === 'map'){ $('quest').textContent = state.flags.kap3Done ? 'Hotovo' : 'Úkol: dojdi na chatičku'; return; }
+  if (state.sceneId === 'kap2'){
+    $('quest').textContent = state.flags.kap2Done ? 'Hotovo' : (state.flags.p1ok ? 'Úkol: vyber hráče 2' : 'Úkol: vyber hráče 1');
+    return;
+  }
+  refreshQuestOld();
+}
+function refreshQuestOld(){
+  let t;
+  if (state.flags.kap1Done) t = 'Hotovo';
+  else if (state.flags.coinTaken) t = 'Úkol: dojdi k automatu';
+  else if (state.flags.drinkDone) t = 'Úkol: najdi minci a dojdi k automatu';
+  else t = 'Úkol: dojdi za barmanem';
+  $('quest').textContent = t;
+}
+function refreshInv(){
+  const box = $('inv');
+  box.innerHTML = '';
+box.appendChild(document.createTextNode(''));
+if ((state.sceneId === 'interier' || state.sceneId === 'kopriv') && state.active === 'sab' && state.inv.includes('svetlo')){ const tb = document.createElement('button'); tb.className = 'slot'; tb.style.width = 'auto'; tb.style.padding = '0 10px'; tb.textContent = state.flags.svitilnaZapnuta ? 'Vypnout svítilnu' : 'Zapnout svítilnu'; tb.addEventListener('click', e => { e.stopPropagation(); if (!state.busy) toggleTorch(); }); box.appendChild(tb); }
+if (false){ const stb = document.createElement('button'); stb.className = 'slot'; stb.style.width = 'auto'; stb.style.padding = '0 10px'; stb.textContent = state.flags.strobo ? 'Vypnout stroboskop' : 'Stroboskop'; stb.addEventListener('click', e => { e.stopPropagation(); if (!state.busy) toggleStrobe(); }); box.appendChild(stb); }
+  if (state.sceneId === 'chata' || state.sceneId === 'interier'){ const sw = document.createElement('button'); sw.className = 'slot'; sw.style.width = 'auto'; sw.style.padding = '0 10px'; sw.textContent = state.active === 'sab' ? 'Přepnout na Ondru' : 'Přepnout na Sabrielu'; sw.addEventListener('click', e => { e.stopPropagation(); if (!state.busy) switchActive(); }); box.appendChild(sw); }
+  if (state.inv.includes('playlist')){
+    const pb = document.createElement('button');
+    pb.className = 'slot';
+    pb.setAttribute('aria-label', 'Playlist Třicátiny');
+    pb.innerHTML = '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" shape-rendering="crispEdges"><rect x="6" y="4" width="10" height="14" fill="#f7ead2"/><rect x="8" y="6" width="6" height="2" fill="#c04a5a"/><rect x="8" y="10" width="6" height="2" fill="#c04a5a"/><rect x="8" y="14" width="3" height="2" fill="#c04a5a"/></svg>';
+    box.appendChild(pb);
+  }
+  if (state.inv.includes('coin')){
+    const b = document.createElement('button');
+    b.className = 'slot';
+    b.setAttribute('aria-label', 'Mince');
+    b.innerHTML = '<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" shape-rendering="crispEdges"><rect x="7" y="3" width="8" height="2" fill="#b8860b"/><rect x="5" y="5" width="12" height="12" fill="#f2c94c"/><rect x="7" y="17" width="8" height="2" fill="#b8860b"/></svg>';
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      if (state.busy) return;
+      say(['Mince. Hodí se k automatu.']);
+    });
+    box.appendChild(b);
+  }
+}
+
+/* ===================== DIALOG ===================== */
+function say(lines, done){
+  state.busy = true;
+  state.lines = lines.slice();
+  state.lineCb = done || null;
+  $('dlg').hidden = false; $('dlgHint').style.display = ''; $('dlgChoices').innerHTML = '';
+  $('dlgText').textContent = state.lines.shift();
+}
+function advance(){
+  if (state.lines === null) return;
+  if (state.lines.length){ $('dlgText').textContent = state.lines.shift(); return; }
+  const cb = state.lineCb;
+  state.lines = null; state.lineCb = null;
+  $('dlg').hidden = true;
+  state.busy = false;
+  cb && cb();
+}
+
+/* ===================== POHYB ===================== */
+const SPEED = 110, MIN_X = 24, MAX_X = 376;
+function walk(tx, done){
+  state.target = Math.max(MIN_X, Math.min(MAX_X, tx));
+  state.onArrive = done || null;
+}
+let lastT = performance.now();
+function frame(t){
+  const dt = Math.min(0.05, (t - lastT) / 1000);
+  lastT = t; if (Date.now() < (state.drunkUntil || 0)) { state.sway = Math.sin(Date.now() / 180) * (state.drunkLevel === 2 ? 14 : 6); placeChar(); }
+  if (state.target !== null){
+    const d = state.target - state.x;
+    const step = SPEED * dt;
+    if (Math.abs(d) <= step){
+      state.x = state.target;
+      state.target = null;
+      setPose('front');
+      placeChar();
+      if (state.sceneId === 'interier' || state.sceneId === 'kopriv') renderObjs(); const cb = state.onArrive;
+      state.onArrive = null;
+      cb && cb();
+    } else {
+      state.x += Math.sign(d) * step + (Date.now() < (state.drunkUntil || 0) ? (Math.random() - 0.5) * 60 * dt : 0);
+      setPose(d > 0 ? 'right' : 'left'); if (state.sceneId === 'interier' || state.sceneId === 'kopriv') renderObjs();
+      placeChar();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ===================== AKCE ===================== */
+function test(c){
+  if (c.has) return state.inv.includes(c.has);
+  if (c.flag) return !!state.flags[c.flag];
+  return false;
+}
+function playReels(done){
+  state.busy = true;
+  for (let i = 0; i < 3; i++){ const el = document.getElementById('reel' + i); if (el) el.textContent = '❄'; }
+  setTimeout(() => {
+    for (let i = 0; i < 3; i++){ const el = document.getElementById('reel' + i); if (el) el.textContent = '♥'; }
+    setTimeout(() => { state.busy = false; done(); }, 700);
+  }, 1500);
+}
+function playReelsOld(done){
+  state.busy = true;
+  const syms = ['♥','⌂','$','★','☺'];
+  let n = 0;
+  const iv = setInterval(() => {
+    for (let i = 0; i < 3; i++){
+      const el = document.getElementById('reel' + i);
+      if (el) el.textContent = syms[(n + i * 2) % syms.length];
+    }
+    n++;
+    if (n > 24){
+      clearInterval(iv);
+      for (let i = 0; i < 3; i++){
+        const el = document.getElementById('reel' + i);
+        if (el) el.textContent = '♥';
+      }
+      state.busy = false;
+      done();
+    }
+  }, 70);
+}
+function exec(a, next){
+  if (a.say) return say(a.say, next);
+  if (a.give){ state.inv.push(a.give); refreshInv(); return next(); }
+  if (a.take){
+    const k = state.inv.indexOf(a.take);
+    if (k >= 0) state.inv.splice(k, 1);
+    refreshInv(); return next();
+  }
+  if (a.flag){
+    state.flags[a.flag] = a.value === undefined ? true : a.value;
+    renderObjs(); refreshQuest(); return next();
+  }
+  if (a.walk !== undefined) return walk(a.walk, next);
+  if (a.scene === 'kap2'){
+    state.sceneId = 'kap2';
+    SCENES.kap2.hotspots = buildKap2();
+    sabG.style.display = 'none';
+    state.target = null;
+    renderBg(); renderObjs(); refreshQuest();
+    return say(['Dvě místa, dva hráči.', 'Vyber hráče 1 a pak hráče 2.'], next);
+  }
+if (a.scene === 'olomIntro'){ return olomIntro(next); }
+if (a.scene === 'olomBath'){ return olomBath(next); }
+if (a.scene === 'olomLoft'){
+    state.sceneId = 'olomLoft';
+    state.pos = { sab: 60, ond: 210 }; state.flags.strobo = false; $('strobe').classList.remove('on');
+    SCENES.olomLoft.hotspots = loftHotspots();
+    sabG.style.display = ''; ondG.style.display = 'none';
+    state.target = null;
+    state.active = 'ond'; state.pose = ''; setPose('front');
+    state.active = 'sab'; state.pose = ''; state.x = state.pos.sab; setPose('front');
+    state.clockMin = 23 * 60 + 40;
+    clearInterval(state.clockTimer);
+    state.clockTimer = setInterval(() => { if (state.sceneId !== 'olomLoft') return; state.clockMin = Math.min(state.clockMin + 1, 1439); renderObjs(); }, 4000);
+    renderBg(); renderObjs(); placeChar(); refreshInv(); refreshQuest();
+    return say(['Sabriela je v loftu a Ondra je tu s ní. Hodiny na zdi tikají k půlnoci.', 'Najednou se z koupelny ozve zvuk. Měla by ses tam podívat.'], next);
+  }
+if (a.scene === 'map'){ state.sceneId = 'map'; state.flags.strobo = false; $('strobe').classList.remove('on'); SCENES.map.hotspots = mapHotspots(); sabG.style.display = 'none'; renderBg(); renderObjs(); refreshQuest(); return say(['Jedeme dál. Na mapě přibyla další zastávka.'], next); }
+  if (a.bed){
+    const who = state.active, other = who === 'sab' ? 'ond' : 'sab';
+    state.flags['inBed_' + who] = true;
+    (who === 'sab' ? sabG : ondG).style.display = 'none';
+    renderObjs(); refreshInv();
+    if (state.flags['inBed_' + other]){ state.flags.bedDone = true; refreshQuest(); heartBig(); return say(['Oba jste v posteli.', 'V srdci něčemu křupne. Tak to má být.'], () => exec({ fade: true }, () => exec({ scene: 'map' }, next))); }
+    switchActive();
+    return say(['Jsi v posteli. Teď přepni na druhého.'], next);
+  }
+  if (a.closeup){ showCloseup(a.closeup); return next(); }
+  if (a.scene === 'kopriv'){
+    state.sceneId = 'kopriv';
+    
+    state.pos = { sab: 60, ond: 210 }; state.flags.strobo = true; $('strobe').classList.add('on'); state.crowd = makeCrowd2(); SCENES.kopriv.hotspots = koprivHotspots6(); startDrinks();
+    sabG.style.display = ''; ondG.style.display = '';
+    state.target = null;
+    state.active = 'ond'; state.pose = ''; setPose('front');
+    state.active = 'sab'; state.pose = ''; state.x = state.pos.sab; setPose('front');
+    renderBg(); renderObjs(); placeChar(); refreshInv(); refreshQuest();
+    return say(KOPRIV_INTRO, next);
+  }
+  if (a.scene === 'bazen'){
+    state.sceneId = 'bazen'; state.flags.strobo = false; $('strobe').classList.remove('on');
+    state.hearts = 3;
+    SCENES.bazen.hotspots = []; state.bazen = { taps: 0, phase: 1, mx: 340, kx: 340, sx: 120 };
+    state.pos = { sab: 90, ond: 300 };
+    sabG.style.display = ''; ondG.style.display = '';
+    state.target = null;
+    state.active = 'ond'; state.pose = ''; setPose('front');
+    state.active = 'sab'; state.pose = ''; state.x = state.pos.sab; setPose('front');
+    renderBg(); renderObjs(); placeChar(); refreshInv(); refreshQuest();
+    return say(BAZEN_INTRO, next);
+  }
+  if (a.closeupHead){ showCloseupHead(a.closeupHead.rows, a.closeupHead.pal); return next(); }
+  if (a.bazenPhase){ const b = state.bazen; b.phase = a.bazenPhase; b.taps = 0; if (a.bazenPhase === 2) b.kx = 340; renderObjs(); refreshQuest(); return next(); }
+  if (a.loseHeart){
+    state.hearts = Math.max(0, (state.hearts == null ? 3 : state.hearts) - 1);
+    drawHud();
+    fadeHeartOut();
+    if (state.hearts === 0) return say(['Ondrovi došla srdíčka a odešel. Začínáme znovu.'], () => devJump('bazen'));
+    return next();
+  }
+  if (a.bad){ badClick(); return next(); }
+  if (a.drinkTest){ if (state.flags.seenA && state.flags.seenB && !state.flags.drinkedOnce) drinkEvent2(); return next(); }
+  if (a.drink){ return miniDrink(next); }
+  if (a.hud){ showHud(); return next(); }
+  if (a.cam){ state.m2speaker = a.cam; renderObjs(); return next(); }
+  if (a.look !== undefined){ state.m2look = a.look; renderObjs(); return next(); }
+  if (a.fade){ return fadeTo(next); }
+  if (a.scene === 'marry2'){
+    state.sceneId = 'marry2';
+    sabG.style.display = 'none'; ondG.style.display = 'none';
+    state.flags.cry = false; state.flags.strobo = false; $('strobe').classList.remove('on');
+    renderBg(); renderObjs(); refreshQuest();
+    return run(M2_SCENE4, () => exec({ fade: true }, () => exec({ scene: 'map' }, next)));
+  }
+  if (a.flight){ return tromsoFlight(next); }
+  if (a.ski){ return tromsoSki(next); }
+  if (a.bath){ return olomBath(next); }
+  if (a.fuetGame){ return olomFuet(next); }
+  if (a.midnight){ return olomMidnight(next); }
+  if (a.heart){ heartPop(); return next(); }
+  if (a.sabRedraw){ const cur = state.active; state.active = 'sab'; state.pose = ''; setPose('front'); state.active = cur; state.pose = ''; setPose('front'); return next(); }
+  if (a.scene === 'interier'){
+    state.sceneId = 'interier';
+    if (!state.inv.includes('svetlo')) state.inv.push('svetlo');
+    SCENES.interier.hotspots = interierHotspots2();
+    state.pos = { sab: 120, ond: 220 };
+    sabG.style.display = ''; ondG.style.display = '';
+    state.target = null;
+    state.active = 'ond'; state.pose = ''; setPose('front');
+    state.active = 'sab'; state.pose = ''; state.x = state.pos.sab; setPose('front');
+    renderBg(); renderObjs(); placeChar(); refreshInv(); refreshQuest();
+    return say(INTERIER_INTRO2, next);
+  }
+  if (a.scene === 'chata'){
+    state.sceneId = 'chata';
+    SCENES.chata.hotspots = chataHotspots();
+    state.pos = { sab: 230, ond: 92 };
+    sabG.style.display = ''; ondG.style.display = '';
+    state.target = null;
+    state.active = 'ond'; state.pose = ''; setPose('front');
+    state.active = 'sab'; state.pose = ''; state.x = state.pos.sab; setPose('front');
+    renderBg(); renderObjs(); placeChar(); refreshInv(); refreshQuest();
+    return say(CHAT_INTRO, next);
+  }
+  if (a.ask) return ask(a.ask.q, a.ask.opts, next);
+  if (a.pick) return pick(a.pick, next);
+  if (a.reels) return playReels(next);
+  if (a.if) return run(test(a.if) ? (a.then || []) : (a.else || []), next);
+  next();
+}
+function run(list, done){
+  let i = 0;
+  const next = () => {
+    if (i >= list.length){ done && done(); return; }
+    exec(list[i++], next);
+  };
+  next();
+}
+
+/* ===================== VSTUP ===================== */
+function toScene(e){
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+$('wrap').addEventListener('click', e => {
+  if (state.busy){ advance(); return; }
+  if (state.sceneId === 'bazen'){ bazenTap2(toScene(e).x); return; }
+  const p = toScene(e);
+  const h = scene().hotspots.find(h =>
+    h.show(state) && inBox(p, h)
+  );
+  if (state.sceneId === 'kopriv' && (!h || (h.id && h.id.indexOf('crowd') === 0))) badClick();
+  if (h && h.stand === undefined) run(h.onTap);
+  else if (h) walk(typeof h.stand === 'function' ? h.stand(state) : h.stand, () => run(h.onTap));
+  else if (state.sceneId !== 'kap2' && state.sceneId !== 'map') walk(p.x);
+});
+
+/* ===================== START ===================== */
+(function init(){
+  const s = scene();
+  state.x = s.start;
+  renderBg();
+  renderObjs();
+  setPose('front');
+  placeChar();
+  refreshInv();
+  refreshQuest();
+  $('titleText').textContent = 'Sabriela vkročila do Marry a aniž by si to uvědomila, začala ji hra, která navždy změnila její život.';
+devStartFromHash();
+  $('title').addEventListener('click', e => {
+    e.stopPropagation();
+    $('title').hidden = true;
+    run(s.intro);
+  });
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
